@@ -58,7 +58,7 @@ public class UserRegisterServiceImp implements UserRegisterService{
 				                           .expiryTime(Instant.now()).build();
 		phoneRegOtpCache.put(phoneRegRequest.getPhoneNumber(), phoneOtpResponse);
 		// trigger sms service to send  otp
-		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).object(phoneOtpResponse).build();
+		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(phoneOtpResponse).build();
 		
 		
 	}
@@ -102,7 +102,7 @@ public class UserRegisterServiceImp implements UserRegisterService{
 					.accessTokenExpiry(jwtService.extractExpiration(token).toInstant())
 					.refreshTokenExpiry(jwtService.extractExpiration(refreshToken).toInstant())
 					.build();
-			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).object(tokenRes).build();
+			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(tokenRes).build();
 					
 
 		}
@@ -189,7 +189,7 @@ public class UserRegisterServiceImp implements UserRegisterService{
 						.refreshTokenExpiry(jwtService.extractExpiration(refreshToken).toInstant())
 						.build();
 	        	
-	        	return CommonResponse.builder().status(Messages.STATUS_SUCCESS).object(tokenRes).build();
+	        	return CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(tokenRes).build();
 
 					
 	        }

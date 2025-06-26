@@ -86,7 +86,7 @@ public class PortfolioServiceImp implements PortfolioService{
 
 			}
 			
-			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message("PortFolio is success" ).object(pfRes).build();
+			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message("PortFolio is success" ).result(pfRes).build();
  	
 		}
 		else

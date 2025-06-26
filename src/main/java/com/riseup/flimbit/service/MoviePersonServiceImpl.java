@@ -33,7 +33,7 @@ public class MoviePersonServiceImpl implements MoviePersonService {
     	}
     	
        MoviePerson per =  movPersRepository.save(CommonUtilty.mapMovPersonReqToMoviePerson(personRequest));
-        return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_UPATE_SUCCESS).object(per).build();
+        return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_UPATE_SUCCESS).result(per).build();
 
     }
 

@@ -95,7 +95,7 @@ public class MovieInvestServiceImp implements MovieInvestService {
 
 							movieInvestRepo.save(movieInves);
 
-							return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message("New and Old Share merged successfully" ).object(invesSucces).build();
+							return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message("New and Old Share merged successfully" ).result(invesSucces).build();
 						}
 						else
 						{	
@@ -112,7 +112,7 @@ public class MovieInvestServiceImp implements MovieInvestService {
 								.perShareAmount(movie.getPerShareAmount())
 								.numberOfOldShares(0)
 								.oldShareAmount(0).build();
-						return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message("New Share buyed successfully" ).object(invesSucces).build();
+						return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message("New Share buyed successfully" ).result(invesSucces).build();
 				
 
 						}

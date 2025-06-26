@@ -11,7 +11,7 @@ public class CommonResponse {
 	
    String status;
    String message;
-   Object object;
+   Object result;
    
 
 }

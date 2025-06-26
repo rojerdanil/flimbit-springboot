@@ -27,7 +27,7 @@ public class MovieActorServiceImpl implements MovieActorService {
     		return CommonResponse.builder().status(Messages.STATUS_FAILURE).message("Role has been added alread to this movie").build();
     	}
     	return CommonResponse.builder().status(Messages.STATUS_SUCCESS)
-    			.message(Messages.STATUS_UPATE_SUCCESS).object(movieActorrepository.save(CommonUtilty.mapMovieActorReqToMovieActor(movieActorReq))).build();
+    			.message(Messages.STATUS_UPATE_SUCCESS).result(movieActorrepository.save(CommonUtilty.mapMovieActorReqToMovieActor(movieActorReq))).build();
         
     }
 

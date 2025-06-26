@@ -2,6 +2,7 @@ package com.riseup.flimbit.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import com.riseup.flimbit.entity.MovieShareSummaryInterface;
 import com.riseup.flimbit.entity.MovieStatus;
 import com.riseup.flimbit.repository.MovieStatusRepository;
 import com.riseup.flimbit.repository.MoviesRepository;
+import com.riseup.flimbit.request.DataTableRequest;
 import com.riseup.flimbit.request.MovieRequest;
 import com.riseup.flimbit.request.MovieSearchRequest;
 import com.riseup.flimbit.response.CommonResponse;
@@ -120,8 +122,54 @@ public class MovieServiceImp implements MovieService{
 				movieRepository.findByLanguageIgnoreCaseOrderByCreatedDate(movieSearchRequest.getLanguage(),movieStatusList,movieSearchRequest.getLimit(),movieSearchRequest.getOffset()));
 		
 			
-		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SEARCH_SUCCESS).object(	
+		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SEARCH_SUCCESS).result(	
 				movieResList).build();
 	}
 
+	@Override
+	public CommonResponse getMoviesForDataTable(DataTableRequest request) {
+		// TODO Auto-generated method stub
+        System.out.println("language " +request.getLanguage() + " objDraw " + request.getDraw());
+
+		String keyword = request.getSearch() != null ? request.getSearch().getValue() : "";
+		String language = request.getLanguage();
+		if(language != null)
+			language = request.getLanguage().isEmpty()  ? null :request.getLanguage();
+	    int limit = 10;
+	    int offset = request.getStart();
+        System.out.println("keyword " +keyword  +" ::"+ limit + offset);
+	    List<Movie> movieList = movieRepository.findMoviesWithSearch(keyword, limit, offset,language);
+	    System.out.println("movielist " + movieList.size());
+	    long total = movieRepository.countMoviesWithSearch(keyword,"");
+	    long totalFiltered = movieList.size(); // total without filter
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("draw", request.getDraw());
+	    response.put("recordsTotal", total);
+	    response.put("recordsFiltered", totalFiltered);
+	    response.put("data", movieList);
+	    return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SEARCH_SUCCESS)
+	    		.result(response).build();	
+
+}
+
+	@Override
+	public CommonResponse findMovieSummaryById(int id) {
+		// TODO Auto-generated method stub
+		List<String> movieStatusList = Arrays.asList(
+				MovieStatusEnum.IDEA_STAGE.getDisplayName(),
+				MovieStatusEnum.PRE_PRODUCTION.getDisplayName(),
+				MovieStatusEnum.FUNDING_OPEN.getDisplayName()
+				);
+		//List<MovieStatus> movieStatusListDb =  movieStatusRepo.findAll();
+		
+		List<MovieShareSummaryInterface> listx = movieRepository.findMovieSummaryById(id);
+		List<MovieResponse> movieResList = CommonUtilty.mapToMovieRespFromMoiveEntity(listx);	
+		if(movieResList != null && movieResList.size() > 0)
+	    	return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SEARCH_SUCCESS).result(	
+				movieResList.get(0)).build();	
+		else
+			return CommonResponse.builder().status(Messages.STATUS_FAILURE).message("Given movie id is not found "+id).result(	
+					movieResList.get(0)).build();	
+	}
 }

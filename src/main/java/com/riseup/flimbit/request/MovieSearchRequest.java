@@ -7,7 +7,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class MovieSearchRequest {
+public class MovieSearchRequest	 {
 	
 	String language;
 	int offset;

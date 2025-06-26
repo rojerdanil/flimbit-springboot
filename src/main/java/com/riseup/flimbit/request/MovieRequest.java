@@ -20,6 +20,8 @@ public class MovieRequest {
 	int movieTypeId;
 	String posterUrl;
 	String trailerUrl;
+     String shareStartTime;
+
 
 
 
