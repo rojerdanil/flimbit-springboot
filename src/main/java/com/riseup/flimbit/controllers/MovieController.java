@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -27,6 +28,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.riseup.flimbit.constant.Messages;
+import com.riseup.flimbit.entity.Language;
+import com.riseup.flimbit.entity.Movie;
+import com.riseup.flimbit.repository.LanguageRepository;
+import com.riseup.flimbit.repository.MoviesRepository;
 import com.riseup.flimbit.request.DataTableRequest;
 import com.riseup.flimbit.request.DeleteRequest;
 import com.riseup.flimbit.request.MovieRequest;
@@ -52,12 +57,18 @@ public class MovieController {
 	@Autowired
 	MovieService movieService;
 	
+	@Autowired
+	LanguageRepository languageRepo;
 	
 	@Value("${movie.upload-dir}")
 	private String uploadDir;
 	
+	@Autowired
+	MoviesRepository movieRepository;
+	
 	@PostMapping("/listMovies")
-    public ResponseEntity<?> listMovies(@RequestHeader(value="deviceId") String deviceId,
+    public ResponseEntity<?> listMovies(
+    		@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		@RequestBody MovieSearchRequest movieSearchRequest
@@ -106,6 +117,19 @@ public class MovieController {
 	        }
 		}
 		
+		Optional<Movie> movieOpt = movieRepository.findByTitleIgnoreCaseAndLanguage(movieRequest.getTitle().trim(),movieRequest.getLanguage().trim());
+		if(movieOpt.isPresent())
+		{
+
+			Optional<Language> langOpt = languageRepo.findById(Long.parseLong(movieRequest.getLanguage()));
+			String langName = langOpt.isPresent() ? langOpt.get().getName() : " Not found";
+			
+		CommonResponse cx =CommonResponse.builder().status(Messages.STATUS_FAILURE).message("Title name " + movieRequest.getTitle().trim()+
+					" is already availabe in same langugage " +langName ).build();
+			return ResponseEntity.status(HttpStatus.OK).body(cx);
+			
+		}
+		
 		String posterPath = "";
 	    if (posterFile != null && !posterFile.isEmpty()) {
 	    	String safeTitle = movieRequest.getTitle().replaceAll("[^a-zA-Z0-9-_]", "_");
@@ -121,10 +145,11 @@ public class MovieController {
 	        }
 	    }
 	    movieRequest.setPosterUrl(posterPath);
-		
-        return ResponseEntity.status(HttpStatus.OK).body(movieService.addMovie(movieRequest));
+	   
+       return ResponseEntity.status(HttpStatus.OK).body(movieService.addMovie(movieRequest));
 
     }
+	    
 	@PostMapping("/deletMovie")
     public ResponseEntity<?> deletMovie(@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
@@ -157,7 +182,8 @@ public class MovieController {
     }
     
     @GetMapping("/moviebyId")
-    public ResponseEntity<?> getMoviesForDataTable(@RequestHeader(value="deviceId") String deviceId,
+    public ResponseEntity<?> getMoviesForDataTable(
+    		@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		 @RequestParam("id") int id

@@ -10,14 +10,17 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.constant.MovieStatusEnum;
+import com.riseup.flimbit.entity.InvestmentSummary;
 import com.riseup.flimbit.entity.Movie;
 import com.riseup.flimbit.entity.MovieShareSummaryInterface;
 import com.riseup.flimbit.entity.MovieStatus;
+import com.riseup.flimbit.repository.MovieInvestRepository;
 import com.riseup.flimbit.repository.MovieStatusRepository;
 import com.riseup.flimbit.repository.MoviesRepository;
 import com.riseup.flimbit.request.DataTableRequest;
@@ -25,6 +28,7 @@ import com.riseup.flimbit.request.MovieRequest;
 import com.riseup.flimbit.request.MovieSearchRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.MovieResponse;
+import com.riseup.flimbit.response.MovieResponseDTO;
 import com.riseup.flimbit.utility.CommonUtilty;
 
 import jakarta.transaction.Transactional;
@@ -40,6 +44,9 @@ public class MovieServiceImp implements MovieService{
 	
 	@Autowired
 	MovieStatusRepository movieStatusRepo;
+	
+	@Autowired
+	MovieInvestRepository InvestmentRepository;
 	
 	
 	@Override
@@ -134,20 +141,67 @@ public class MovieServiceImp implements MovieService{
 		String keyword = request.getSearch() != null ? request.getSearch().getValue() : "";
 		String language = request.getLanguage();
 		if(language != null)
-			language = request.getLanguage().isEmpty()  ? null :request.getLanguage();
+			language = request.getLanguage().isEmpty()  ? "" :request.getLanguage();
+		
 	    int limit = 10;
 	    int offset = request.getStart();
-        System.out.println("keyword " +keyword  +" ::"+ limit + offset);
+        System.out.println("keyword " +keyword  +" :limit:"+ limit + ":offset:" + offset);
 	    List<Movie> movieList = movieRepository.findMoviesWithSearch(keyword, limit, offset,language);
-	    System.out.println("movielist " + movieList.size());
+	    List<MovieResponseDTO> dtoList = new ArrayList<>();
+	    List<InvestmentSummary> investmentSummaryList = null;
+	    if(movieList !=null && movieList.size() > 0)
+	    {
+	    	List<Long> movieIds = movieList.stream()
+	    		    .map(movie -> Long.valueOf(movie.getId()))  // Ensures it's Long
+	    		    .collect(Collectors.toList());
+	    	investmentSummaryList = InvestmentRepository.getShareSummaryForMovieIds(movieIds);
+	    }
+	 // Map<movieId, totalSharesSold>
+	 Map<Long, Integer> movieToSharesSold = investmentSummaryList.stream()
+	     .collect(Collectors.toMap(InvestmentSummary::getMovieId, InvestmentSummary::getTotalShares));
+	    
+	    for (Movie movie : movieList) {
+	        MovieResponseDTO dto = new MovieResponseDTO();
+	        BeanUtils.copyProperties(movie, dto); // Spring utility
+	        int total = movie.getBudget() / movie.getPerShareAmount();
+	        int sold = movieToSharesSold.getOrDefault(movie.getId(), 0);
+
+	        String status = "Not Started";
+	        if (sold == total) status = "Sold Out";
+	        else if (sold > 0) status = "Live";
+
+	        dto.setShareStatus(status);
+	        dto.setDaysBeforeRelease(CommonUtilty.getDaysBeforeRelease(movie.getReleaseDate()));
+
+	        int totalShares = movie.getBudget() / movie.getPerShareAmount();
+	        int soldShares = movieToSharesSold.getOrDefault(movie.getId(), 0);
+	        int soldAmount = soldShares * movie.getPerShareAmount();
+	        int percent = (int) (((double) soldShares / totalShares) * 100);
+
+	        dto.setSharesSold(soldShares);
+	        dto.setTotalShares(totalShares);
+	        dto.setShareSoldAmount("₹" + soldAmount + " of ₹" + movie.getBudget());
+	        dto.setFundingPercent(percent);
+	        
+	        dtoList.add(dto);
+	    }
+
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    System.out.println("movielist " + dtoList.size());
 	    long total = movieRepository.countMoviesWithSearch(keyword,"");
-	    long totalFiltered = movieList.size(); // total without filter
+	    long totalFiltered = dtoList.size(); // total without filter
 
 	    Map<String, Object> response = new HashMap<>();
 	    response.put("draw", request.getDraw());
 	    response.put("recordsTotal", total);
 	    response.put("recordsFiltered", totalFiltered);
-	    response.put("data", movieList);
+	    response.put("data", dtoList);
 	    return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SEARCH_SUCCESS)
 	    		.result(response).build();	
 

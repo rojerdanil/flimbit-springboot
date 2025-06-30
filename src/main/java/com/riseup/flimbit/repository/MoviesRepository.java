@@ -1,6 +1,7 @@
 package com.riseup.flimbit.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,8 @@ import com.riseup.flimbit.entity.User;
 public interface MoviesRepository extends JpaRepository<Movie, Long> {
 	
 	void deleteByIdIn(List<Integer> moivieIds);
+	
+	Optional<Movie>  findByTitleIgnoreCaseAndLanguage(String title,String language);
 	
 	//List<Movie> findByLanguageIgnoreCaseOrderByCreatedDate(String language);
 	
@@ -42,7 +45,7 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
     
     
     @Query(value = """
-    	    SELECT * FROM movies
+    	    SELECT * FROM movies	
     	    WHERE 
     	        (:keyword IS NULL OR :keyword = '' 
     	         OR LOWER(title) LIKE LOWER(CONCAT('%', :keyword, '%')) 

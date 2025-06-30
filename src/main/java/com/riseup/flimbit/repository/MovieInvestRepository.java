@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.riseup.flimbit.entity.EarningBreakInFace;
+import com.riseup.flimbit.entity.InvestmentSummary;
 import com.riseup.flimbit.entity.MovieInvestSummary;
 import com.riseup.flimbit.entity.MovieInvestment;
 
@@ -43,5 +44,12 @@ public interface MovieInvestRepository extends JpaRepository<MovieInvestment, Lo
     		+" from movies_investment mi"
     		+" LEFT JOIN movies mo on mo.id = mi.movie_id where mi.user_id = ?1 group by mo.title" ,nativeQuery = true)
     List<EarningBreakInFace> getEarningBreak(int userId);
+    
+    
+    @Query(value = "SELECT i.movie_id AS movieId, SUM(i.number_Of_Shares) AS totalShares " +
+    	       "FROM movies_investment i " +
+    	       "WHERE i.movie_id IN :movieIds " +
+    	       "GROUP BY i.movie_id",nativeQuery = true)
+    	List<InvestmentSummary> getShareSummaryForMovieIds(@Param("movieIds") List<Long> movieIds);
     
  }

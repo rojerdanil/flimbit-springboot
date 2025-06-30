@@ -52,4 +52,10 @@ public class MoviePersonServiceImpl implements MoviePersonService {
     public List<MoviePerson> findAll() {
         return movPersRepository.findAll();
     }
+
+	@Override
+	public List<MoviePerson> findAllByLanguagId(int id) {
+		// TODO Auto-generated method stub
+		return movPersRepository.findByLanguage(id);
+	}
 }

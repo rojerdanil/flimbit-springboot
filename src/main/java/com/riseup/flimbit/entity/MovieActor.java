@@ -18,7 +18,7 @@ public class MovieActor {
     @Column(name = "movie_id")
     private int movieId;
 
-    @Column(name = "role_movie_id")
+    @Column(name = "movie_role_id")
     private int roleMovieId;
     @Column(name = "movie_actor_id")
     private int actorId;

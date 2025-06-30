@@ -12,5 +12,5 @@ public interface MoviePersonService {
     MoviePerson update(Integer id, MoviePerson person);
     void delete(Integer id);
     List<MoviePerson> findAll();
-
+    List<MoviePerson> findAllByLanguagId(int id);
 }

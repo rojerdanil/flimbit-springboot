@@ -11,4 +11,7 @@ public interface MovieActorService {
     MovieActor update(Integer id, MovieActor actor);
     void delete(Integer id);
     List<MovieActor> findAll();
+    
+    CommonResponse getAllRoleByMovieId(int id);
+    
 }
