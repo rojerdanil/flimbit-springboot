@@ -9,12 +9,15 @@ import com.riseup.flimbit.response.CommonResponse;
 
 public interface MovieService {
 	
-	public CommonResponse addMovie(MovieRequest movieRequest);
+	public  CommonResponse addMovie(MovieRequest movieRequest);
 	public  CommonResponse updateMovie(MovieRequest movieRequest);
 	public  CommonResponse deleteMovie(List<Integer> ids);
 	public  CommonResponse getMoviesByLanguage(MovieSearchRequest movieSearchRequest);
 	public  CommonResponse  getMoviesForDataTable(DataTableRequest request);
 	public  CommonResponse  findMovieSummaryById(int id);
+	public  CommonResponse  findMovieEnityById(int id);
+
+	
 
 	
 

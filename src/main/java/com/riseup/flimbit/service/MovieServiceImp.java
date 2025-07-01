@@ -1,5 +1,6 @@
 package com.riseup.flimbit.service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ import com.riseup.flimbit.request.MovieRequest;
 import com.riseup.flimbit.request.MovieSearchRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.MovieResponse;
-import com.riseup.flimbit.response.MovieResponseDTO;
+import com.riseup.flimbit.response.MovieDTOSummary;
 import com.riseup.flimbit.utility.CommonUtilty;
 
 import jakarta.transaction.Transactional;
@@ -54,14 +55,42 @@ public class MovieServiceImp implements MovieService{
 		// TODO Auto-generated method stub
 		if(Optional.ofNullable(movieRequest).isPresent())
 		{
-			Movie movieNew = new Movie();
-			Movie movie = CommonUtilty.mapToMovieEnity(movieRequest,movieNew);
-			if(Optional.ofNullable(movie).isPresent())
+			Movie movieNew = null;
+			if(movieRequest.isEdit() == true)
 			{
-				movieRepository.save(movie);
-				return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_UPATE_SUCCESS).build();
+				Long id = movieRequest.getId();
+				Optional<Movie> movieExitOpt = movieRepository.findById(id);
+				if(movieExitOpt.isPresent())
+				{
+					Movie movieExit = movieExitOpt.get();
+					movieExit = CommonUtilty.mapToMovieEnity(movieRequest,movieExit);
+					movieExit.setUpdatedDate( new Timestamp(System.currentTimeMillis()));
+					movieRepository.save(movieExit);
 
+					return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_UPATE_SUCCESS).build();
+
+				}
+				else
+					return CommonResponse.builder().status(Messages.STATUS_FAILURE).message("movie is not found by id").build();
+	
+				
 			}
+			else
+			{
+
+				Movie movie = new Movie();
+				movie = CommonUtilty.mapToMovieEnity(movieRequest,movie);
+				if(Optional.ofNullable(movie).isPresent())
+				{
+					movieRepository.save(movie);
+					return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_UPATE_SUCCESS).build();
+
+				}
+
+				
+			}
+			
+			
 			return CommonResponse.builder().status(Messages.STATUS_FAILURE).message(Messages.REQUEST_OBJECT_NOTCONVERTED).build();
 
 
@@ -119,14 +148,15 @@ public class MovieServiceImp implements MovieService{
 	@Override
 	public CommonResponse getMoviesByLanguage(MovieSearchRequest movieSearchRequest) {
 		// TODO Auto-generated method stub
-		List<String> movieStatusList = Arrays.asList(
-				MovieStatusEnum.IDEA_STAGE.getDisplayName(),
-				MovieStatusEnum.PRE_PRODUCTION.getDisplayName(),
-				MovieStatusEnum.FUNDING_OPEN.getDisplayName()
-				);
+		/*
+		 * List<String> movieStatusList = Arrays.asList(
+		 * MovieStatusEnum.IDEA_STAGE.getDisplayName(),
+		 * MovieStatusEnum.PRE_PRODUCTION.getDisplayName(),
+		 * MovieStatusEnum.FUNDING_OPEN.getDisplayName() );
+		 */
 		//List<MovieStatus> movieStatusListDb =  movieStatusRepo.findAll();
 		List<MovieResponse> movieResList =CommonUtilty.mapToMovieRespFromMoiveEntity(
-				movieRepository.findByLanguageIgnoreCaseOrderByCreatedDate(movieSearchRequest.getLanguage(),movieStatusList,movieSearchRequest.getLimit(),movieSearchRequest.getOffset()));
+				movieRepository.findByLanguageIgnoreCaseOrderByCreatedDate(movieSearchRequest.getLanguage(),movieSearchRequest.getLimit(),movieSearchRequest.getOffset(),"true"));
 		
 			
 		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SEARCH_SUCCESS).result(	
@@ -147,7 +177,7 @@ public class MovieServiceImp implements MovieService{
 	    int offset = request.getStart();
         System.out.println("keyword " +keyword  +" :limit:"+ limit + ":offset:" + offset);
 	    List<Movie> movieList = movieRepository.findMoviesWithSearch(keyword, limit, offset,language);
-	    List<MovieResponseDTO> dtoList = new ArrayList<>();
+	    List<MovieDTOSummary> dtoList = new ArrayList<>();
 	    List<InvestmentSummary> investmentSummaryList = null;
 	    if(movieList !=null && movieList.size() > 0)
 	    {
@@ -157,14 +187,26 @@ public class MovieServiceImp implements MovieService{
 	    	investmentSummaryList = InvestmentRepository.getShareSummaryForMovieIds(movieIds);
 	    }
 	 // Map<movieId, totalSharesSold>
-	 Map<Long, Integer> movieToSharesSold = investmentSummaryList.stream()
+	 Map<Long, Integer> movieToSharesSold = null;
+			
+	  if(investmentSummaryList != null && investmentSummaryList.size() !=0)
+		  movieToSharesSold =investmentSummaryList.stream()
 	     .collect(Collectors.toMap(InvestmentSummary::getMovieId, InvestmentSummary::getTotalShares));
 	    
 	    for (Movie movie : movieList) {
-	        MovieResponseDTO dto = new MovieResponseDTO();
+	        MovieDTOSummary dto = new MovieDTOSummary();
 	        BeanUtils.copyProperties(movie, dto); // Spring utility
 	        int total = movie.getBudget() / movie.getPerShareAmount();
-	        int sold = movieToSharesSold.getOrDefault(movie.getId(), 0);
+	        int sold = 0;
+	        int soldShares = 0;
+
+	        	if(movieToSharesSold  !=null)	 
+	        	{
+	        		sold = movieToSharesSold.getOrDefault(movie.getId(), 0);
+	    	         soldShares = movieToSharesSold.getOrDefault(movie.getId(), 0);
+
+	        	}
+	        		
 
 	        String status = "Not Started";
 	        if (sold == total) status = "Sold Out";
@@ -174,7 +216,6 @@ public class MovieServiceImp implements MovieService{
 	        dto.setDaysBeforeRelease(CommonUtilty.getDaysBeforeRelease(movie.getReleaseDate()));
 
 	        int totalShares = movie.getBudget() / movie.getPerShareAmount();
-	        int soldShares = movieToSharesSold.getOrDefault(movie.getId(), 0);
 	        int soldAmount = soldShares * movie.getPerShareAmount();
 	        int percent = (int) (((double) soldShares / totalShares) * 100);
 
@@ -182,7 +223,7 @@ public class MovieServiceImp implements MovieService{
 	        dto.setTotalShares(totalShares);
 	        dto.setShareSoldAmount("₹" + soldAmount + " of ₹" + movie.getBudget());
 	        dto.setFundingPercent(percent);
-	        
+	        dto.setActiveStatus(movie.getStatus());
 	        dtoList.add(dto);
 	    }
 
@@ -226,4 +267,18 @@ public class MovieServiceImp implements MovieService{
 			return CommonResponse.builder().status(Messages.STATUS_FAILURE).message("Given movie id is not found "+id).result(	
 					movieResList.get(0)).build();	
 	}
+
+	@Override
+	public CommonResponse findMovieEnityById(int id) {
+		// TODO Auto-generated method stub
+		long newId = id;
+		 Optional<Movie> movieOpt =   movieRepository.findById(newId);
+		 if(movieOpt.isPresent())
+		 {
+			 return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SUCCESS).result(	
+					 CommonUtilty.MapToMovieEntityResponse(movieOpt.get())).build();	
+			 
+			 
+		}
+		 return CommonResponse.builder().status(Messages.STATUS_FAILURE).message("Given movie id is not found "+id).build();		}
 }

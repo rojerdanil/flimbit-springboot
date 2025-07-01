@@ -32,25 +32,26 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
     		+" LEFT JOIN movie_actors ma ON ma.movie_id = mo.id"
     		+ " LEFT JOIN movie_person mp ON mp.id = ma.movie_actor_id"
     		+ " LEFT JOIN roles_in_movie rim ON rim.id = ma.movie_role_id"
-    		+ " where mo.language = :language and ms.name in (:moviesStatuList)  "
+    		+ " where mo.language = :language and mo.status = :status " 
+    		 +" and EXISTS ( SELECT 1 FROM share_type s WHERE s.movie_id = mo.id and s.is_active = true and NOW() BETWEEN start_date AND end_date )  "
     		+ " GROUP BY "
     		+ " mo.id, mo.title, mo.description, mo.language, mo.budget, mo.per_share_amount,"
     		+ " mo.created_date, mo.updated_date, mo.release_date, mo.trailer_date,"
     		+ " mo.trailer_url, mo.poster_url, mt.name, ms.name "
     		+" LIMIT :limit OFFSET :offset "
     		, nativeQuery = true)
-	List<MovieShareSummaryInterface> findByLanguageIgnoreCaseOrderByCreatedDate(@Param("language") String language,
-			@Param("moviesStatuList") List<String> moviesStatuList,@Param("limit") int limt,@Param("offset") int offset);
+	List<MovieShareSummaryInterface> findByLanguageIgnoreCaseOrderByCreatedDate(@Param("language") String language,@Param("limit") int limt,@Param("offset") int offset,@Param("status") String status);
     
     
     
     @Query(value = """
-    	    SELECT * FROM movies	
+    	    SELECT s.* FROM movies s	
+    	    
     	    WHERE 
     	        (:keyword IS NULL OR :keyword = '' 
-    	         OR LOWER(title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
-    	         OR LOWER(language) LIKE LOWER(CONCAT('%', :keyword, '%')))
-    	      AND (:language IS NULL OR :language = '' OR LOWER(language) = LOWER(:language))
+    	         OR LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+    	         OR LOWER(s.language) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    	      AND (:language IS NULL OR :language = '' OR LOWER(s.language) = LOWER(:language)) 
     	    ORDER BY created_date DESC
     	    LIMIT :limit OFFSET :offset
     	""", nativeQuery = true)
@@ -98,5 +99,7 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
    		+" "
    		, nativeQuery = true)
 	List<MovieShareSummaryInterface> findMovieSummaryById(@Param("id") int id);
+    
+    
    
 }

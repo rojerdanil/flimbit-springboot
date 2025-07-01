@@ -1,30 +1,29 @@
-package com.riseup.flimbit.request;
+package com.riseup.flimbit.response;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Builder
-@Setter
 @Getter
-public class MovieRequest {
-	long  id;
+@Setter
+public class MovieEntityResponse {
+	long id;
 	String title;
 	String description;
 	String language;
 	int budget;
-	String releaseDate;
-	String trailerDate;
-	int status;
 	int perShareAmount;
+	String  createdDate;
+	String updatedDate ;
+	String  releaseDate ;
+	String trailerDate ;
+
+	int statusId;
 	int movieTypeId;
 	String posterUrl;
 	String trailerUrl;
-    String activeStatus;
-    boolean isEdit ;
+	String status;
 
 
-
-
-	
 }

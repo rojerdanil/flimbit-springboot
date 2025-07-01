@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MovieResponseDTO {
+public class MovieDTOSummary {
     private long id;
     private String title;
     private String description;
@@ -16,6 +16,7 @@ public class MovieResponseDTO {
     private int perShareAmount;
     private Timestamp releaseDate;
     private Timestamp trailerDate;
+    private Timestamp createdDate;
     private int statusId;
     private int movieTypeId;
     private String posterUrl;
@@ -26,6 +27,7 @@ public class MovieResponseDTO {
     private int totalShares;
     private String shareSoldAmount; // e.g. ₹2,50,000 of ₹10,00,000
     private int fundingPercent;
+    String activeStatus;
     
 
     // Getters & setters...

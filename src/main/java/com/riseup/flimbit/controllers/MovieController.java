@@ -116,7 +116,12 @@ public class MovieController {
 	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
 	        }
 		}
+		System.out.println("is Edit " + movieRequest.isEdit());
 		
+		if(!movieRequest.isEdit())
+		{
+			System.out.println("it is insert");
+
 		Optional<Movie> movieOpt = movieRepository.findByTitleIgnoreCaseAndLanguage(movieRequest.getTitle().trim(),movieRequest.getLanguage().trim());
 		if(movieOpt.isPresent())
 		{
@@ -129,9 +134,11 @@ public class MovieController {
 			return ResponseEntity.status(HttpStatus.OK).body(cx);
 			
 		}
+		}
 		
 		String posterPath = "";
 	    if (posterFile != null && !posterFile.isEmpty()) {
+
 	    	String safeTitle = movieRequest.getTitle().replaceAll("[^a-zA-Z0-9-_]", "_");
 	        String extension = FilenameUtils.getExtension(posterFile.getOriginalFilename()); // e.g., jpg, png
 	        String fileName = safeTitle + "." + extension;
@@ -140,12 +147,13 @@ public class MovieController {
 	            Path targetPath = Paths.get(uploadDir + fileName);
 	            Files.copy(posterFile.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 	            posterPath = targetPath.toString(); // Save this in DB
+	  	        movieRequest.setPosterUrl(posterPath);
+
 	        } catch (IOException e) {
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed: " + e.getMessage());
 	        }
 	    }
-	    movieRequest.setPosterUrl(posterPath);
-	   
+	    System.out.println("url " +movieRequest.getPosterUrl());
        return ResponseEntity.status(HttpStatus.OK).body(movieService.addMovie(movieRequest));
 
     }
@@ -197,7 +205,23 @@ public class MovieController {
 		}
         return ResponseEntity.status(HttpStatus.OK).body(movieService.findMovieSummaryById(id));
     }
-    		
+    
+    @GetMapping("/entity/moviebyId")
+    public ResponseEntity<?> getMoviesEntity(
+    		@RequestHeader(value="deviceId") String deviceId,
+    		@RequestHeader(value="phoneNumber") String phoneNumber,
+    		@RequestHeader(value="accessToken") String accessToken,
+    		 @RequestParam("id") int id
+    		) {
+    	if(isValidateTokenEnable)
+		{	
+		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
+           if (commonToken.getStatus() != Messages.SUCCESS) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
+	        }
+		}
+        return ResponseEntity.status(HttpStatus.OK).body(movieService.findMovieEnityById(id));
+    }
     		
     		
     		

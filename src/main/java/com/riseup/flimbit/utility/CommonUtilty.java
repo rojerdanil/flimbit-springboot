@@ -1,6 +1,7 @@
 package com.riseup.flimbit.utility;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,11 +24,13 @@ import com.riseup.flimbit.request.MovieActorRequest;
 import com.riseup.flimbit.request.MoviePersonRequest;
 import com.riseup.flimbit.request.MovieRequest;
 import com.riseup.flimbit.request.ShareTypeRequest;
+import com.riseup.flimbit.response.MovieEntityResponse;
 import com.riseup.flimbit.response.MovieResponse;
 import com.riseup.flimbit.response.ShareTypeResponse;
 
 public class CommonUtilty {
-	
+    private static final SimpleDateFormat formatterWithTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 	public static boolean checkEmptyOrNull(String name)
 	{
 		return Optional.ofNullable(name).filter(s -> !s.isEmpty()).isPresent();
@@ -116,6 +119,29 @@ public class CommonUtilty {
 		return movResList;
 	}
 	
+	public static MovieEntityResponse MapToMovieEntityResponse(Movie movie) {
+
+        return MovieEntityResponse.builder()
+                .id(movie.getId())
+                .title(movie.getTitle())
+                .description(movie.getDescription())
+                .language(movie.getLanguage())
+                .budget(movie.getBudget())
+                .perShareAmount(movie.getPerShareAmount())
+                .createdDate( formatTimestamp(movie.getCreatedDate()))
+                .updatedDate(formatTimestamp(movie.getUpdatedDate()))
+                .releaseDate(formatTimestamp(movie.getReleaseDate()))
+                .trailerDate(formatTimestamp(movie.getTrailerDate()))
+                .statusId(movie.getStatusId())
+                .movieTypeId(movie.getMovieTypeId())
+                .posterUrl(movie.getPosterUrl())
+                .trailerUrl(movie.getTrailerUrl())
+                .status(movie.getStatus() != null ? movie.getStatus() : "")
+                .build();
+    }
+	 private static String formatTimestamp(Timestamp timestamp) {
+	        return timestamp != null ? formatterWithTime.format(timestamp) : null;
+	    }
 	public static Movie  mapToMovieEnity(MovieRequest movieReq,Movie movies)
 	{
 		if(Optional.ofNullable(movieReq).isPresent())
@@ -142,6 +168,8 @@ public class CommonUtilty {
      			movies.setPosterUrl(movieReq.getPosterUrl());
             if(checkEmptyOrNull(movieReq.getTrailerUrl()))
      			movies.setTrailerUrl(movieReq.getTrailerUrl());
+            if(checkEmptyOrNull(movieReq.getActiveStatus()))
+     			movies.setStatus(movieReq.getActiveStatus());
 			return movies;
 		}
 		return null;

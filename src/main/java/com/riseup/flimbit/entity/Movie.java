@@ -2,6 +2,7 @@ package com.riseup.flimbit.entity;
 
 import java.sql.Timestamp;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,8 +33,9 @@ public class Movie {
 
 	int statusId;
 	int movieTypeId;
+	@Column(name = "poster_url")
 	String posterUrl;
 	String trailerUrl;
-
+    String status;
 
 }
