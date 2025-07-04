@@ -1,4 +1,4 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import com.riseup.flimbit.repository.UserRepository;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.EarningBreakResponse;
 import com.riseup.flimbit.response.PortFolioResponse;
+import com.riseup.flimbit.service.PortfolioService;
 
 @Service
 public class PortfolioServiceImp implements PortfolioService{

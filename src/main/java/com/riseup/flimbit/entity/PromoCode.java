@@ -38,4 +38,7 @@ public class PromoCode {
 
     @Column(name = "updated_at")
     private Timestamp updatedAt = new Timestamp(System.currentTimeMillis());
+    
+    private int promoTypeId;
+    
 }

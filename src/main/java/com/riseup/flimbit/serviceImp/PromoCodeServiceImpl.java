@@ -7,6 +7,7 @@ import com.riseup.flimbit.repository.PromoCodeRepository;
 import com.riseup.flimbit.service.PromoCodeService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PromoCodeServiceImpl implements PromoCodeService {
@@ -30,7 +31,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     }
 
     @Override
-    public PromoCode getByCode(String code) {
+    public Optional<PromoCode> getByCode(String code) {
         return repository.findByPromoCode(code);
     }
 

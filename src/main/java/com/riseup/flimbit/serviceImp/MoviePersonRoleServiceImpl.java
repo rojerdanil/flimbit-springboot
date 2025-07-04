@@ -1,7 +1,9 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 import com.riseup.flimbit.entity.MoviePersonType;
 import com.riseup.flimbit.repository.MoviePersonRoleRepository;
+import com.riseup.flimbit.service.MoviePersonRoleService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.entity.ActorsPlayInMovieInterface;
@@ -6,6 +6,7 @@ import com.riseup.flimbit.entity.MovieActor;
 import com.riseup.flimbit.repository.MovieActorRepository;
 import com.riseup.flimbit.request.MovieActorRequest;
 import com.riseup.flimbit.response.CommonResponse;
+import com.riseup.flimbit.service.MovieActorService;
 import com.riseup.flimbit.utility.CommonUtilty;
 
 import org.springframework.beans.factory.annotation.Autowired;

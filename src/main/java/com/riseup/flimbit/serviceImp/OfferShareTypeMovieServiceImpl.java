@@ -1,10 +1,11 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.riseup.flimbit.entity.OfferShareTypeMovie;
 import com.riseup.flimbit.repository.OfferShareTypeMovieRepository;
+import com.riseup.flimbit.service.OfferShareTypeMovieService;
 
 import java.util.List;
 

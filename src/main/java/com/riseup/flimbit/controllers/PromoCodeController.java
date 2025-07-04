@@ -32,7 +32,8 @@ public class PromoCodeController {
 
     @GetMapping("/code/{promoCode}")
     public PromoCode getByCode(@PathVariable String promoCode) {
-        return promoCodeService.getByCode(promoCode);
+        return promoCodeService.getByCode(promoCode)
+        		.orElseThrow(() -> new RuntimeException("Promo Code not found "+ promoCode));
     }
 
     @DeleteMapping("/{id}")

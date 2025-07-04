@@ -1,4 +1,4 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -29,6 +29,7 @@ import com.riseup.flimbit.request.MovieRequest;
 import com.riseup.flimbit.request.MovieSearchRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.MovieResponse;
+import com.riseup.flimbit.service.MovieService;
 import com.riseup.flimbit.response.MovieDTOSummary;
 import com.riseup.flimbit.utility.CommonUtilty;
 

@@ -1,4 +1,4 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 import java.sql.Timestamp;
 import java.util.Optional;
@@ -19,6 +19,7 @@ import com.riseup.flimbit.request.MovieIinvestSuccess;
 import com.riseup.flimbit.request.MovieInvestRequest;
 import com.riseup.flimbit.request.MovieRequest;
 import com.riseup.flimbit.response.CommonResponse;
+import com.riseup.flimbit.service.MovieInvestService;
 
 @Service
 public class MovieInvestServiceImp implements MovieInvestService {
@@ -104,7 +105,7 @@ public class MovieInvestServiceImp implements MovieInvestService {
 						movieInves.setAmountInvested(userInvest);
 						movieInves.setMovieId(movieInvRequest.getMovieId());
 						movieInves.setNumberOfShares(movieInvRequest.getNumberOfShares());
-						movieInves.setUserId(user.getId());
+						movieInves.setUserId(Integer.parseInt(user.getId()+""));
 						movieInvestRepo.save(movieInves);
 						MovieIinvestSuccess invesSucces = MovieIinvestSuccess.builder()
 								.movieId(movieInvRequest.getMovieId())

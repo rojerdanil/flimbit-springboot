@@ -20,7 +20,6 @@ import com.riseup.flimbit.request.UserRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.TokenResponse;
 import com.riseup.flimbit.service.UserRegisterService;
-import com.riseup.flimbit.service.UserRegisterServiceImp;
 import com.riseup.flimbit.utility.JwtService;
 
 

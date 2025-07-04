@@ -36,14 +36,14 @@ public interface MovieInvestRepository extends JpaRepository<MovieInvestment, Lo
     	      + " 'Production', 'Post Production','Trailer Released','Coming Soon') THEN mi.amount_invested ELSE 0 END) AS ongoingFunds"
     	    +" FROM movies_investment mi JOIN movies m ON mi.movie_id = m.id "
     	   +" JOIN  movie_status ms ON m.status_id = ms.id  WHERE  mi.user_id = ?1", nativeQuery = true)
-    MovieInvestSummary  getPortFolioSummary(int userId);
+    MovieInvestSummary  getPortFolioSummary(long userId);
 
     @Query(value = "SELECT mo.title as movieName ,sum(mi.amount_invested) as invested ,sum(mi.return_amount) as returned"
     		+ ",ROUND(CASE WHEN SUM(mi.amount_invested) = 0 THEN 0"
     		+" ELSE (SUM(mi.return_amount) * 100 / SUM(mi.amount_invested))  END, 2) AS averageRoi"
     		+" from movies_investment mi"
     		+" LEFT JOIN movies mo on mo.id = mi.movie_id where mi.user_id = ?1 group by mo.title" ,nativeQuery = true)
-    List<EarningBreakInFace> getEarningBreak(int userId);
+    List<EarningBreakInFace> getEarningBreak(long userId);
     
     
     @Query(value = "SELECT i.movie_id AS movieId, SUM(i.number_Of_Shares) AS totalShares " +

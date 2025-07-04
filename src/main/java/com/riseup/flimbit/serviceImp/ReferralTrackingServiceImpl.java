@@ -1,10 +1,11 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.riseup.flimbit.entity.ReferralTracking;
 import com.riseup.flimbit.repository.ReferralTrackingRepository;
+import com.riseup.flimbit.service.ReferralTrackingService;
 
 import java.util.List;
 

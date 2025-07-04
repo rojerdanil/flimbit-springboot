@@ -19,10 +19,12 @@ import com.riseup.flimbit.entity.MovieActor;
 import com.riseup.flimbit.entity.MoviePerson;
 import com.riseup.flimbit.entity.MovieShareSummaryInterface;
 import com.riseup.flimbit.entity.MovieStatus;
+import com.riseup.flimbit.entity.PromotionType;
 import com.riseup.flimbit.entity.ShareType;
 import com.riseup.flimbit.request.MovieActorRequest;
 import com.riseup.flimbit.request.MoviePersonRequest;
 import com.riseup.flimbit.request.MovieRequest;
+import com.riseup.flimbit.request.PromotionTypeRequest;
 import com.riseup.flimbit.request.ShareTypeRequest;
 import com.riseup.flimbit.response.MovieEntityResponse;
 import com.riseup.flimbit.response.MovieResponse;
@@ -287,6 +289,62 @@ public class CommonUtilty {
 	        .perShareAmount(dto.getPerShareAmount() != null ? dto.getPerShareAmount() : 0)
 	        .build();
 	}
+ 
+ public static PromotionType convertToEntity(PromotionTypeRequest request, PromotionType entity ) {
+	   
+
+	    
+
+	    // Type Code
+	    if (request.getTypeCode() != null && !request.getTypeCode().trim().isEmpty()) {
+	        entity.setTypeCode(request.getTypeCode().trim());
+	    } else {
+	        throw new IllegalArgumentException("Type Code must not be empty.");
+	    }
+
+	    // Description
+	    if (request.getDescription() != null && !request.getDescription().trim().isEmpty()) {
+	        entity.setDescription(request.getDescription().trim());
+	    } else {
+	        throw new IllegalArgumentException("Description must not be empty.");
+	    }
+
+	    // Status
+	    if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+	        entity.setStatus(request.getStatus().trim());
+	    } else {
+	        entity.setStatus("Active"); // Default if null/empty
+	    }
+
+	    // User Count
+	    if (request.getUserCount() >= 0) {
+	        entity.setUserCount(request.getUserCount());
+	    } else {
+	        throw new IllegalArgumentException("User count must be non-negative.");
+	    }
+
+	    // Expiry Days
+	    if (request.getExpiryDays() >= 0) {
+	        entity.setExpiryDays(request.getExpiryDays());
+	    } else {
+	        throw new IllegalArgumentException("Expiry days must be non-negative.");
+	    }
+
+	    // Prize amount (if you're using it now or later)
+	    entity.setPrizeAmount(0);
+
+	    // Set creation time if new
+	    if (!request.isEdit()) {
+	        entity.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+	    }
+
+	    return entity;
+	}
+
+    
+    
+ 
+ 
  private static int parseInt(String val, int defaultVal) {
 	    try {
 	        return val != null ? Integer.parseInt(val) : defaultVal;

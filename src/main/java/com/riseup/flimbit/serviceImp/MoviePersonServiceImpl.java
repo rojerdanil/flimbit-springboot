@@ -1,4 +1,4 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +9,7 @@ import com.riseup.flimbit.entity.MoviePerson;
 import com.riseup.flimbit.repository.MoviePersonRepository;
 import com.riseup.flimbit.request.MoviePersonRequest;
 import com.riseup.flimbit.response.CommonResponse;
+import com.riseup.flimbit.service.MoviePersonService;
 import com.riseup.flimbit.utility.CommonUtilty;
 
 import java.util.List;

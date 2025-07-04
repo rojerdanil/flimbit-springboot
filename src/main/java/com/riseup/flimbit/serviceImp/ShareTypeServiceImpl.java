@@ -1,4 +1,4 @@
-package com.riseup.flimbit.service;
+package com.riseup.flimbit.serviceImp;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +12,7 @@ import com.riseup.flimbit.repository.ShareTypeRepository;
 import com.riseup.flimbit.request.ShareTypeRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.ShareTypeResponse;
+import com.riseup.flimbit.service.ShareTypeService;
 import com.riseup.flimbit.utility.CommonUtilty;
 
 import java.util.ArrayList;

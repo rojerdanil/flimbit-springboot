@@ -21,7 +21,7 @@ public class Offer {
     private String offerName;
 
     @Column(name = "offer_type", nullable = false)
-    private String offerType;
+    private int  offerType;
 
     @Column(name = "target_audience")
     private String targetAudience;

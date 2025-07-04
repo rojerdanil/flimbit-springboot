@@ -10,4 +10,5 @@ public interface UserWalletBalanceService {
     void addShareCash(Long userId, BigDecimal amount);
     void deductShareCash(Long userId, BigDecimal amount);
     BigDecimal getBalance(Long userId);
+    
 }

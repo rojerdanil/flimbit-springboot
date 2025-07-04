@@ -14,6 +14,7 @@ public class UserRequest {
 	String email;
 	String status;
 	String language;
+	String promoCode;
 	UserStatusVerify userStatusVerify;
 
 
