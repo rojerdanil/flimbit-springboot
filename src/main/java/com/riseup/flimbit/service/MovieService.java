@@ -2,6 +2,7 @@ package com.riseup.flimbit.service;
 
 import java.util.List;
 
+import com.riseup.flimbit.entity.Movie;
 import com.riseup.flimbit.request.DataTableRequest;
 import com.riseup.flimbit.request.MovieRequest;
 import com.riseup.flimbit.request.MovieSearchRequest;
@@ -16,6 +17,8 @@ public interface MovieService {
 	public  CommonResponse  getMoviesForDataTable(DataTableRequest request);
 	public  CommonResponse  findMovieSummaryById(int id);
 	public  CommonResponse  findMovieEnityById(int id);
+	public  List<Movie>  getMovieByLanguage(int id);
+
 
 	
 

@@ -14,8 +14,8 @@ public class AuditLogServiceImp {
 	@Autowired
 	AuditLogRepository auditLogRepository;
 	
-	public void logAction(Long userId, String actionType, String entityName, 
-			Long entityId, String description, Object requestData) {
+	public void logAction(int userId, String actionType, String entityName, 
+			int entityId, String description, Object requestData) {
         AuditLog log = AuditLog.builder()
             .userId(userId)
             .actionType(actionType)

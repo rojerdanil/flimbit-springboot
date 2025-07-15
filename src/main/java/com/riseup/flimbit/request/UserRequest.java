@@ -13,7 +13,7 @@ public class UserRequest {
 	String lastName;
 	String email;
 	String status;
-	String language;
+	int language;
 	String promoCode;
 	UserStatusVerify userStatusVerify;
 

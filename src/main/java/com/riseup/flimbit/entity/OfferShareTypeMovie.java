@@ -31,10 +31,10 @@ public class OfferShareTypeMovie {
 	    private Long movieId;
 
 	    @Column(name = "valid_from", nullable = false)
-	    private LocalDate validFrom;
+	    private Timestamp validFrom = new Timestamp(System.currentTimeMillis());
 
 	    @Column(name = "valid_to", nullable = false)
-	    private LocalDate validTo;
+	    private Timestamp validTo = new Timestamp(System.currentTimeMillis());
 
 	    @Column(name = "max_users")
 	    private Integer maxUsers;
@@ -48,11 +48,14 @@ public class OfferShareTypeMovie {
 	    @Column(name = "no_profit_commission")
 	    private Boolean noProfitCommission = false;
 
+	    @Column(name = "no_platform_commission")
+	    private Boolean noPlatFormCommission = false;
+	    
 	    @Column(name = "promo_code_required")
 	    private Boolean promoCodeRequired =false;
 
-	    @Column(name = "status")
-	    private String status = "unactive";
+	    @Column(name = "status")  
+	    private String status = "unactive"; 
 
 	    @Column(name = "created_at")
 	    private Timestamp createdAt = new Timestamp(System.currentTimeMillis());

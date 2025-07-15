@@ -10,10 +10,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PromotionRewardRepository extends JpaRepository<PromotionReward, Long> {
-    List<PromotionReward> findByPromotionTypeIdAndStatusIgnoreCase(Long promotionTypeId, String status);
+   Optional< List<PromotionReward>> findByPromotionTypeIdAndStatusIgnoreCase(Long promotionTypeId, String status);
 
     @Query("SELECT r FROM PromotionReward r WHERE " +
     	       "LOWER(r.rewardType) LIKE LOWER(CONCAT('%', :search, '%')) OR " +

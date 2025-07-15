@@ -23,7 +23,7 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
 	@SequenceGenerator(name = "user_id_seq", sequenceName = "user_id_seq", allocationSize = 1)
 
-	long id;
+	int id;
 	String phoneNumber;
 	String deviceId;
 	String panId;
@@ -35,7 +35,7 @@ public class User {
 	Timestamp updatedDate = new Timestamp(System.currentTimeMillis());
 	Timestamp lastLogin = new Timestamp(System.currentTimeMillis());
 	String status;
-	String language;
+	int language;
 
 
 }

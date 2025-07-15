@@ -126,7 +126,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 			user.setPhoneNumber(phRegValiReq.getPhoneNumber());
 			user.setStatus(Messages.USER_ACTIVE);
 			user.setAccessKey(token);
-			long id = userRepository.save(user).getId();
+			int id = userRepository.save(user).getId();
 			logger.info("id " + id);
 			UserStatus userStatus = new UserStatus();
 			userStatus.setUserId(Integer.parseInt(id + ""));
@@ -178,7 +178,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 			if (CommonUtilty.checkEmptyOrNull(userRequest.getStatus())) {
 				user.setStatus(userRequest.getStatus());
 			}
-			if (CommonUtilty.checkEmptyOrNull(userRequest.getLanguage())) {
+			if (user.getLanguage() != 0) {
 				user.setLanguage(userRequest.getLanguage());
 				if (userRequest.getUserStatusVerify().isLanguageVerified())
 					userStatus.setLanguageVerified(true);
@@ -227,16 +227,15 @@ public class UserRegisterServiceImp implements UserRegisterService {
 		if (Optional.ofNullable(promoType).isPresent()) {
 
 			PromoCode promo = PromoCode.builder().promoCode("Welcome Promo " + user.getId())
-					.promoType(promoType.getTypeCode()).usesLeft(promoType.getUserCount())
-					.expiryDate(Date.valueOf(LocalDate.now().plusDays(promoType.getExpiryDays())))
+					//.promoType(promoType.getTypeCode()).usesLeft(promoType.getUserCount())
+					//.expiryDate(Date.valueOf(LocalDate.now().plusDays(promoType.getExpiryDays())))
 					.status(StatusEnum.INACTIVE.getDescription().toLowerCase())
-					.promoTypeId(Integer.parseInt(promoType.getId() + ""))
+					//.promoTypeId(Integer.parseInt(promoType.getId() + ""))
 					.createdAt(new Timestamp(System.currentTimeMillis()))
 					.updatedAt(new Timestamp(System.currentTimeMillis())).build();
 
 			promo = promoCodeRepository.save(promo);
-			long userId = user.getId();
-			UserPromoCode userPromo = UserPromoCode.builder().userId(userId).promoId(promo.getId())
+			UserPromoCode userPromo = UserPromoCode.builder().userId(user.getId()).promoId(promo.getId())
 					.usedAt(new Timestamp(System.currentTimeMillis())).build();
 
 			userPromoCodeRepository.save(userPromo);
@@ -269,18 +268,14 @@ public class UserRegisterServiceImp implements UserRegisterService {
 
 		if (promoType != null) {
 
-			PromoCode promo = PromoCode.builder().promoCode(code).promoType(promoType.getTypeCode())
-					.usesLeft(promoType.getUserCount())
-					.expiryDate(Date.valueOf(LocalDate.now().plusDays(promoType.getExpiryDays())))
+			PromoCode promo = PromoCode.builder().promoCode(code)
 					.status(StatusEnum.ACTIVE.getDescription().toLowerCase())
-					.promoTypeId(Integer.parseInt(promoType.getId() + ""))
 					.createdAt(new Timestamp(System.currentTimeMillis()))
 					.updatedAt(new Timestamp(System.currentTimeMillis())).build();
 
 			promo = promoCodeRepository.save(promo);
 
-			long userId = user.getId();
-			UserPromoCode userPromo = UserPromoCode.builder().userId(userId).promoId(promo.getId())
+			UserPromoCode userPromo = UserPromoCode.builder().userId(user.getId()).promoId(promo.getId())
 					.usedAt(new Timestamp(System.currentTimeMillis())).build();
 
 			userPromoCodeRepository.save(userPromo);
@@ -299,8 +294,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 		System.out.println(" applyReferralCodeDuringSignup ");
 
 		if (promo != null) {
-			if (!promo.getStatus().equalsIgnoreCase("Active") || promo.getUsesLeft() <= 0
-					|| promo.getExpiryDate().before(new Timestamp(System.currentTimeMillis()))) {
+			if (!promo.getStatus().equalsIgnoreCase("Active") ) {
 				
 				if (promo.getStatus().equalsIgnoreCase(StatusEnum.ACTIVE.name())) {
 
@@ -331,7 +325,6 @@ public class UserRegisterServiceImp implements UserRegisterService {
 						.usedAt(new Timestamp(System.currentTimeMillis())).build());
 
 				// Decrease uses left
-				promo.setUsesLeft(promo.getUsesLeft() - 1);
 				promoCodeRepository.save(promo);
 
 			}
@@ -341,7 +334,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 		// Give ₹10 share cash to new user
 	}
 
-	public Long getOwnerOfPromo(Long promoId) {
+	public int getOwnerOfPromo(int promoId) {
 		return userPromoCodeRepository.findFirstByPromoId(promoId).stream().map(UserPromoCode::getUserId).findFirst()
 				.orElse(null); // or throw exception if mandatory
 	}

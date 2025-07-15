@@ -16,17 +16,17 @@ public class UserWalletBalanceController {
 
   
     @GetMapping("/{userId}")
-    public BigDecimal getBalance(@PathVariable Long userId) {
+    public BigDecimal getBalance(@PathVariable int userId) {
         return walletService.getBalance(userId);
     }
 
     @PostMapping("/{userId}/add")
-    public void addCash(@PathVariable Long userId, @RequestParam BigDecimal amount) {
+    public void addCash(@PathVariable int userId, @RequestParam BigDecimal amount) {
         walletService.addShareCash(userId, amount);
     }
 
     @PostMapping("/{userId}/deduct")
-    public void deductCash(@PathVariable Long userId, @RequestParam BigDecimal amount) {
+    public void deductCash(@PathVariable int userId, @RequestParam BigDecimal amount) {
         walletService.deductShareCash(userId, amount);
     }
 }

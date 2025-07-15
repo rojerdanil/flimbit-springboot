@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.riseup.flimbit.constant.Messages;
-import com.riseup.flimbit.dto.ShareTypeDTO;
-import com.riseup.flimbit.entity.ShareType;
-import com.riseup.flimbit.repository.ShareTypeRepository;
+import com.riseup.flimbit.entity.MovieShareType;
+import com.riseup.flimbit.entity.dto.ShareTypeDTO;
+import com.riseup.flimbit.repository.MovieShareTypeRepository;
 import com.riseup.flimbit.request.ShareTypeRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.ShareTypeResponse;
@@ -24,14 +24,14 @@ import java.util.Optional;
 public class ShareTypeServiceImpl implements ShareTypeService {
 
 	@Autowired
-    private  ShareTypeRepository repository;
+    private  MovieShareTypeRepository repository;
 
     @Override
     public CommonResponse create(ShareTypeRequest shareTypeRequest,String type) {
     	
     	if(type.trim().equalsIgnoreCase("insert"))
     	{
-    		ShareType shareType = new ShareType();
+    		MovieShareType shareType = new MovieShareType();
     		shareType = CommonUtilty.mapRequestToEntity(shareTypeRequest,shareType);
     		return CommonResponse.builder().status(Messages.STATUS_SUCCESS)
     				.message("inserted successfully")
@@ -41,11 +41,11 @@ public class ShareTypeServiceImpl implements ShareTypeService {
     	else if(type.trim().equalsIgnoreCase("update"))
     	{
     		
-    		Optional<ShareType> shareTypeOpt = repository.findById(shareTypeRequest.getId());
+    		Optional<MovieShareType> shareTypeOpt = repository.findById(shareTypeRequest.getId());
     		
     		if(shareTypeOpt.isPresent())
     		{
-    			ShareType shareType = shareTypeOpt.get();
+    			MovieShareType shareType = shareTypeOpt.get();
         		shareType = CommonUtilty.mapRequestToEntity(shareTypeRequest,shareType);
                  
 
@@ -69,7 +69,7 @@ public class ShareTypeServiceImpl implements ShareTypeService {
     }
 
     @Override
-    public List<ShareType> findByMovieId(Long movieId) {
+    public List<MovieShareType> findByMovieId(Long movieId) {
         return repository.findByMovieId(movieId);
     }
 

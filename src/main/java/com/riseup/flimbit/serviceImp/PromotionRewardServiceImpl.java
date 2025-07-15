@@ -1,6 +1,7 @@
 package com.riseup.flimbit.serviceImp;
 
 
+import com.riseup.flimbit.constant.StatusEnum;
 import com.riseup.flimbit.entity.PromotionReward;
 import com.riseup.flimbit.repository.PromotionRewardRepository;
 import com.riseup.flimbit.request.PromotionRewardRequest;
@@ -26,8 +27,11 @@ public class PromotionRewardServiceImpl implements PromotionRewardService {
     private PromotionRewardRepository promotionRewardRepository;
 
     @Override
-    public List<PromotionReward> getRewardsByPromotionType(Long promotionTypeId) {
-        return promotionRewardRepository.findByPromotionTypeIdAndStatusIgnoreCase(promotionTypeId, "Active");
+    public List<PromotionReward> getRewardsByPromotionTypeAndStatus(Long promotionTypeId,String status)
+    {
+        return promotionRewardRepository.findByPromotionTypeIdAndStatusIgnoreCase(promotionTypeId, status)
+        		.filter(list -> !list.isEmpty())
+        		.orElseThrow(() -> new RuntimeException("No reward is found for type id "+promotionTypeId ));
     }
 
    
@@ -74,6 +78,7 @@ public class PromotionRewardServiceImpl implements PromotionRewardService {
 	}
 
 
+    @Transactional
 	@Override
 	public void deleteById(long id) {
 		// TODO Auto-generated method stub

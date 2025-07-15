@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name = "share_type")
 @Getter
 @Setter
-public class ShareType {
+public class MovieShareType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "share_type_seq")

@@ -18,7 +18,7 @@ public class UserWalletBalance {
     private Long id;
 
     @Column(name = "user_id", nullable = false, unique = true)
-    private Long userId;
+    private int userId;
 
     @Column(name = "share_cash_balance", nullable = false)
     private BigDecimal shareCashBalance = BigDecimal.ZERO;

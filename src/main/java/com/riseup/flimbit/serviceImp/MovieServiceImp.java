@@ -21,6 +21,7 @@ import com.riseup.flimbit.entity.InvestmentSummary;
 import com.riseup.flimbit.entity.Movie;
 import com.riseup.flimbit.entity.MovieShareSummaryInterface;
 import com.riseup.flimbit.entity.MovieStatus;
+import com.riseup.flimbit.repository.LanguageRepository;
 import com.riseup.flimbit.repository.MovieInvestRepository;
 import com.riseup.flimbit.repository.MovieStatusRepository;
 import com.riseup.flimbit.repository.MoviesRepository;
@@ -49,6 +50,8 @@ public class MovieServiceImp implements MovieService{
 	
 	@Autowired
 	MovieInvestRepository InvestmentRepository;
+	
+	
 	
 	
 	@Override
@@ -156,8 +159,9 @@ public class MovieServiceImp implements MovieService{
 		 * MovieStatusEnum.FUNDING_OPEN.getDisplayName() );
 		 */
 		//List<MovieStatus> movieStatusListDb =  movieStatusRepo.findAll();
+		System.out.println("lang gu :" + movieSearchRequest.getLanguage());
 		List<MovieResponse> movieResList =CommonUtilty.mapToMovieRespFromMoiveEntity(
-				movieRepository.findByLanguageIgnoreCaseOrderByCreatedDate(movieSearchRequest.getLanguage(),movieSearchRequest.getLimit(),movieSearchRequest.getOffset(),"true"));
+				movieRepository.findByLanguageOrderByCreatedDate(movieSearchRequest.getLanguage(),movieSearchRequest.getLimit(),movieSearchRequest.getOffset(),"true"));
 		
 			
 		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SEARCH_SUCCESS).result(	
@@ -282,4 +286,12 @@ public class MovieServiceImp implements MovieService{
 			 
 		}
 		 return CommonResponse.builder().status(Messages.STATUS_FAILURE).message("Given movie id is not found "+id).build();		}
+
+	@Override
+	public List<Movie> getMovieByLanguage(int id) {
+		// TODO Auto-generated method stub
+        List<Movie> movieList = movieRepository.getMovieByLanguage(id);
+         
+		return movieList;
+	}
 }

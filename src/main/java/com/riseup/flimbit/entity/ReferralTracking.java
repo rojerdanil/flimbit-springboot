@@ -17,9 +17,9 @@ public class ReferralTracking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long referrerUserId;
+    private int referrerUserId;
 
-    private Long referredUserId;
+    private int referredUserId;
 
     private String promoCode;
 

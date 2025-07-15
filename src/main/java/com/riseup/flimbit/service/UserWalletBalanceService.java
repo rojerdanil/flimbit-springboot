@@ -6,9 +6,9 @@ import java.math.BigDecimal;
 import com.riseup.flimbit.entity.UserWalletBalance;
 
 public interface UserWalletBalanceService {
-    UserWalletBalance getOrCreateWallet(Long userId);
-    void addShareCash(Long userId, BigDecimal amount);
-    void deductShareCash(Long userId, BigDecimal amount);
-    BigDecimal getBalance(Long userId);
+    UserWalletBalance getOrCreateWallet(int userId);
+    void addShareCash(int i, BigDecimal amount);
+    void deductShareCash(int userId, BigDecimal amount);
+    BigDecimal getBalance(int userId);
     
 }

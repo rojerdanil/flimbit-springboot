@@ -22,13 +22,13 @@ import lombok.NoArgsConstructor;
 public class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
-    private Long userId;
+    private int userId;
 
     private String actionType;
     private String entityName;
-    private Long entityId;
+    private int entityId;
 
     private String description;
 

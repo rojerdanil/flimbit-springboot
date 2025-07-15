@@ -1,5 +1,6 @@
 package com.riseup.flimbit.request;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import lombok.Builder;
@@ -13,7 +14,7 @@ public class MovieIinvestSuccess {
 	int numberOfNewShares; 
 	int perShareAmount;
 	int numberOfOldShares;
-	int oldShareAmount;
+	BigDecimal oldShareAmount;
 	
 	
 }

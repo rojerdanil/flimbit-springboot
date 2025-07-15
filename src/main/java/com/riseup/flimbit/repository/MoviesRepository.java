@@ -15,7 +15,7 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
 	
 	void deleteByIdIn(List<Integer> moivieIds);
 	
-	Optional<Movie>  findByTitleIgnoreCaseAndLanguage(String title,String language);
+	Optional<Movie>  findByTitleIgnoreCaseAndLanguage(String title,int language);
 	
 	//List<Movie> findByLanguageIgnoreCaseOrderByCreatedDate(String language);
 	
@@ -40,18 +40,19 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
     		+ " mo.trailer_url, mo.poster_url, mt.name, ms.name "
     		+" LIMIT :limit OFFSET :offset "
     		, nativeQuery = true)
-	List<MovieShareSummaryInterface> findByLanguageIgnoreCaseOrderByCreatedDate(@Param("language") String language,@Param("limit") int limt,@Param("offset") int offset,@Param("status") String status);
+	List<MovieShareSummaryInterface> findByLanguageOrderByCreatedDate(@Param("language") String language,@Param("limit") int limt,@Param("offset") int offset,@Param("status") String status);
     
     
     
     @Query(value = """
     	    SELECT s.* FROM movies s	
-    	    
+    	    join languages lan on lan.id = s.language	
+
     	    WHERE 
     	        (:keyword IS NULL OR :keyword = '' 
     	         OR LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
-    	         OR LOWER(s.language) LIKE LOWER(CONCAT('%', :keyword, '%')))
-    	      AND (:language IS NULL OR :language = '' OR LOWER(s.language) = LOWER(:language)) 
+    	         OR LOWER(lan.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    	      AND (:language IS NULL OR :language = '' OR LOWER(lan.name) = LOWER(:language)) 
     	    ORDER BY created_date DESC
     	    LIMIT :limit OFFSET :offset
     	""", nativeQuery = true)
@@ -63,12 +64,14 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
     	);
 
     @Query(value = """
-    	    SELECT COUNT(*) FROM movies
+    	    SELECT COUNT(s.*) FROM movies s
+    	    join languages lan on lan.id = s.language	
+
     	    WHERE 
     	        (:keyword IS NULL OR :keyword = '' 
     	         OR LOWER(title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
-    	         OR LOWER(language) LIKE LOWER(CONCAT('%', :keyword, '%')))
-    	      AND (:language IS NULL OR :language = '' OR LOWER(language) = LOWER(:language))
+    	         OR LOWER(lan.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    	      AND (:language IS NULL OR :language = '' OR LOWER(lan.name) = LOWER(:language))
     	""", nativeQuery = true)
     	long countMoviesWithSearch(
     	    @Param("keyword") String keyword,
@@ -99,6 +102,25 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
    		+" "
    		, nativeQuery = true)
 	List<MovieShareSummaryInterface> findMovieSummaryById(@Param("id") int id);
+    
+    @Query(value = """
+    	    SELECT s.* FROM movies s	
+    	    join languages lan on lan.id = s.language	
+
+    	    WHERE s.language =  :language and  LOWER(s.status) = LOWER(:status)
+    	        
+    	""", nativeQuery = true)
+	List<Movie>  getByLanguageAndStatusIgnoreCase(@Param("language")  int id,@Param("status")  String status);
+
+    
+    @Query(value = """
+    	    SELECT s.* FROM movies s	
+    	    join languages lan on lan.id = s.language	
+
+    	    WHERE s.language =  :language 
+    	        
+    	""", nativeQuery = true)
+	List<Movie>  getMovieByLanguage(@Param("language")  int id);
     
     
    

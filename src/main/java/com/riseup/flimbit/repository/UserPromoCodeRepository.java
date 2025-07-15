@@ -26,7 +26,9 @@ public interface UserPromoCodeRepository extends JpaRepository<UserPromoCode, Lo
 		    @Param("typeCodes") List<String> typeCodes);
 	
 	UserPromoCode findByPromoId(long promoId);
-	Optional<UserPromoCode> findFirstByPromoId(Long promoId);
+	Optional<UserPromoCode> findFirstByPromoId(int promoId);
+	
+	Optional<UserPromoCode>  findByPromoIdAndRewardMapId(int promoId,int rewardMapId);
 
 
 }

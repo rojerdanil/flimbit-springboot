@@ -13,14 +13,14 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import com.riseup.flimbit.dto.ShareTypeDTO;
 import com.riseup.flimbit.entity.Movie;
 import com.riseup.flimbit.entity.MovieActor;
 import com.riseup.flimbit.entity.MoviePerson;
 import com.riseup.flimbit.entity.MovieShareSummaryInterface;
 import com.riseup.flimbit.entity.MovieStatus;
 import com.riseup.flimbit.entity.PromotionType;
-import com.riseup.flimbit.entity.ShareType;
+import com.riseup.flimbit.entity.dto.ShareTypeDTO;
+import com.riseup.flimbit.entity.MovieShareType;
 import com.riseup.flimbit.request.MovieActorRequest;
 import com.riseup.flimbit.request.MoviePersonRequest;
 import com.riseup.flimbit.request.MovieRequest;
@@ -127,7 +127,7 @@ public class CommonUtilty {
                 .id(movie.getId())
                 .title(movie.getTitle())
                 .description(movie.getDescription())
-                .language(movie.getLanguage())
+                .language(movie.getLanguage()+"")
                 .budget(movie.getBudget())
                 .perShareAmount(movie.getPerShareAmount())
                 .createdDate( formatTimestamp(movie.getCreatedDate()))
@@ -153,7 +153,7 @@ public class CommonUtilty {
             if(checkEmptyOrNull(movieReq.getDescription()))
 			  movies.setDescription(movieReq.getDescription());
             if(checkEmptyOrNull(movieReq.getLanguage()))
-			   movies.setLanguage(movieReq.getLanguage().trim());
+			   movies.setLanguage(Integer.parseInt(movieReq.getLanguage()));
             if(checkEmptyOrNull(movieReq.getTitle()))
      			movies.setTitle(movieReq.getTitle());
             if(checkEmptyOrNull(movieReq.getReleaseDate()))
@@ -177,7 +177,7 @@ public class CommonUtilty {
 		return null;
 	}
 	
-	public static ShareType mapRequestToEntity(ShareTypeRequest request, ShareType entity) {
+	public static MovieShareType mapRequestToEntity(ShareTypeRequest request, MovieShareType entity) {
 	    if (request.getCategoryId() != null)
 	        entity.setCategoryId(request.getCategoryId());
 
@@ -235,8 +235,6 @@ public class CommonUtilty {
          // Convert LocalDateTime to java.sql.Timestamp
          Timestamp sqlTimestamp = Timestamp.valueOf(localDateTime);
 
-         System.out.println("Original String: " + timestampString);
-         System.out.println("Converted SQL Timestamp: " + sqlTimestamp);
          return sqlTimestamp;
      } catch (Exception e) {
          System.err.println("Error converting timestamp: " + e.getMessage());

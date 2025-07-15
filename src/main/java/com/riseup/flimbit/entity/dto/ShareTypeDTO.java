@@ -1,4 +1,4 @@
-package com.riseup.flimbit.dto;
+package com.riseup.flimbit.entity.dto;
 
 import java.sql.Timestamp;
 

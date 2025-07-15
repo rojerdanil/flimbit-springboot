@@ -99,7 +99,7 @@ public class PromotionTypeController {
         PromotionType proType =  promotionTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("PromoType is not found for id :" +id));
         
-        ;
+       
         return HttpResponseUtility.getHttpSuccess(proType);
 
     }

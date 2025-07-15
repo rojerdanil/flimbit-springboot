@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -39,6 +40,7 @@ import com.riseup.flimbit.request.MovieSearchRequest;
 import com.riseup.flimbit.request.UserRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.service.MovieService;
+import com.riseup.flimbit.utility.HttpResponseUtility;
 import com.riseup.flimbit.utility.JwtService;
 
 import jakarta.persistence.NamedStoredProcedureQueries;
@@ -122,7 +124,7 @@ public class MovieController {
 		{
 			System.out.println("it is insert");
 
-		Optional<Movie> movieOpt = movieRepository.findByTitleIgnoreCaseAndLanguage(movieRequest.getTitle().trim(),movieRequest.getLanguage().trim());
+		Optional<Movie> movieOpt = movieRepository.findByTitleIgnoreCaseAndLanguage(movieRequest.getTitle().trim(),Integer.parseInt(movieRequest.getLanguage().trim()));
 		if(movieOpt.isPresent())
 		{
 
@@ -223,6 +225,21 @@ public class MovieController {
         return ResponseEntity.status(HttpStatus.OK).body(movieService.findMovieEnityById(id));
     }
     		
-    		
+    @GetMapping("/language/{id}")
+    public ResponseEntity<?> getMovieLanguage(
+    		@RequestHeader(value="deviceId") String deviceId,
+    		@RequestHeader(value="phoneNumber") String phoneNumber,
+    		@RequestHeader(value="accessToken") String accessToken,
+    		@PathVariable("id") int id
+    		) {
+    	if(isValidateTokenEnable)
+		{	
+		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
+           if (commonToken.getStatus() != Messages.SUCCESS) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
+	        }
+		}
+        return HttpResponseUtility.getHttpSuccess(movieService.getMovieByLanguage(id));
+    }		
     		
 }

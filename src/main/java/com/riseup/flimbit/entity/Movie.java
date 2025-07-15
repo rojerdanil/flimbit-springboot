@@ -23,7 +23,7 @@ public class Movie {
 	long id;
 	String title;
 	String description;
-	String language;
+	int language;
 	int budget;
 	int perShareAmount;
 	Timestamp  createdDate = new Timestamp(System.currentTimeMillis());

@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 public interface PromotionRewardService {
-    List<PromotionReward> getRewardsByPromotionType(Long promotionTypeId);
+    List<PromotionReward> getRewardsByPromotionTypeAndStatus(Long promotionTypeId,String status);
     PromotionReward createReward(PromotionRewardRequest reward);
     Page<PromotionReward> getPaginated(int start, int length, String searchText, String sortColumn, String sortOrder);
     PromotionReward  getRewardById(long id);

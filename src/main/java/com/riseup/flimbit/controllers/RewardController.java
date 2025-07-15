@@ -1,7 +1,10 @@
 package com.riseup.flimbit.controllers;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,11 +21,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.riseup.flimbit.constant.Messages;
+import com.riseup.flimbit.constant.RewardTarget;
+import com.riseup.flimbit.constant.RewardType;
+import com.riseup.flimbit.constant.StatusEnum;
 import com.riseup.flimbit.entity.PromotionReward;
 import com.riseup.flimbit.entity.PromotionType;
 import com.riseup.flimbit.request.PromotionRewardRequest;
 import com.riseup.flimbit.request.PromotionTypeRequest;
 import com.riseup.flimbit.response.CommonResponse;
+import com.riseup.flimbit.response.dto.KeyValueDtoResponse;
+import com.riseup.flimbit.response.dto.RewardTypeAndTargetDtoRes;
 import com.riseup.flimbit.service.PromotionRewardService;
 import com.riseup.flimbit.utility.HttpResponseUtility;
 import com.riseup.flimbit.utility.JwtService;
@@ -31,7 +39,7 @@ import com.riseup.flimbit.utility.JwtService;
 @RestController
 @RequestMapping("/reward-types")
 
-public class AwardController {
+public class RewardController {
 	
 	
 
@@ -143,5 +151,52 @@ public class AwardController {
 	        return HttpResponseUtility.getHttpSuccess("deleted successfully");
 
 	    }
+	 
+    	 @GetMapping("/rewardTypeAndTarget")
+	    public ResponseEntity<?> delete(@RequestHeader(value="deviceId") String deviceId,
+	    		@RequestHeader(value="phoneNumber") String phoneNumber,
+	    		@RequestHeader(value="accessToken") String accessToken) {
+	    	if(isValidateTokenEnable)
+			{	
+			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
+	           if (commonToken.getStatus() != Messages.SUCCESS) {
+		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
+		        }
+			}
+	    	
+	    	List<KeyValueDtoResponse> types = Arrays.stream(RewardType.values())
+	                .map(rt -> new KeyValueDtoResponse(rt.name(), rt.getLabel()))
+	                .collect(Collectors.toList());
+	    	
+	    	List<KeyValueDtoResponse> target = Arrays.stream(RewardTarget.values())
+	                .map(rt -> new KeyValueDtoResponse(rt.name(), rt.getLabel()))
+	                .collect(Collectors.toList());
+	    	
+	    	RewardTypeAndTargetDtoRes rewardTypeTarget = RewardTypeAndTargetDtoRes.builder()
+	    			 .types(types).target(target).build();
+	    	
+	        return HttpResponseUtility.getHttpSuccess(rewardTypeTarget);
 
+	    }
+	 
+
+    	 
+    	 @GetMapping("/rewardsbytype/{id}")
+ 	    public ResponseEntity<?> getRewardsByrewardTypeId(
+ 	    		@RequestHeader(value="deviceId") String deviceId,
+ 	    		@RequestHeader(value="phoneNumber") String phoneNumber,
+ 	    		@RequestHeader(value="accessToken") String accessToken,
+ 	    		@PathVariable Long id) {
+    		 
+    			if(isValidateTokenEnable)
+    			{	
+    			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
+    	           if (commonToken.getStatus() != Messages.SUCCESS) {
+    		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
+    		        }
+    			}
+ 	     
+ 	        return HttpResponseUtility.getHttpSuccess(promotionRewardService.getRewardsByPromotionTypeAndStatus(id,StatusEnum.ACTIVE.getDescription()));
+
+ 	    }
 }

@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/share-category")
-@CrossOrigin(origins = "*")
 public class ShareCategoryController {
 
     @Autowired

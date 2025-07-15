@@ -18,7 +18,7 @@ public class UserWalletBalanceServiceImpl implements UserWalletBalanceService {
   
 
     @Override
-    public UserWalletBalance getOrCreateWallet(Long userId) {
+    public UserWalletBalance getOrCreateWallet(int userId) {
         return walletRepo.findByUserId(userId).orElseGet(() -> {
             UserWalletBalance wallet = UserWalletBalance.builder()
                     .userId(userId)
@@ -29,7 +29,7 @@ public class UserWalletBalanceServiceImpl implements UserWalletBalanceService {
     }
 
     @Override
-    public void addShareCash(Long userId, BigDecimal amount) {
+    public void addShareCash(int userId, BigDecimal amount) {
         UserWalletBalance wallet = getOrCreateWallet(userId);
         wallet.setShareCashBalance(wallet.getShareCashBalance().add(amount));
         wallet.setLastUpdated(java.time.LocalDateTime.now());
@@ -37,7 +37,7 @@ public class UserWalletBalanceServiceImpl implements UserWalletBalanceService {
     }
 
     @Override
-    public void deductShareCash(Long userId, BigDecimal amount) {
+    public void deductShareCash(int userId, BigDecimal amount) {
         UserWalletBalance wallet = getOrCreateWallet(userId);
         if (wallet.getShareCashBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient wallet balance");
@@ -48,7 +48,7 @@ public class UserWalletBalanceServiceImpl implements UserWalletBalanceService {
     }
 
     @Override
-    public BigDecimal getBalance(Long userId) {
+    public BigDecimal getBalance(int userId) {
         return getOrCreateWallet(userId).getShareCashBalance();
     }
 }

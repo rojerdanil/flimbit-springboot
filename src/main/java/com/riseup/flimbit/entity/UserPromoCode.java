@@ -19,11 +19,13 @@ public class UserPromoCode {
     private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private int  userId;
 
     @Column(name = "promo_id", nullable = false)
-    private Long promoId;
+    private int promoId;
 
     @Column(name = "used_at")
     private Timestamp usedAt = new Timestamp(System.currentTimeMillis());
+    @Column(name = "reward_map_id")
+    int rewardMapId;
 }

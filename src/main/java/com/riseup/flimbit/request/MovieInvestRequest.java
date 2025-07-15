@@ -10,4 +10,5 @@ import lombok.Setter;
 public class MovieInvestRequest {
 	int movieId; 
 	int numberOfShares; 
+	int shareTypeId;
 }

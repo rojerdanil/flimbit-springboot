@@ -5,13 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.riseup.flimbit.dto.ShareTypeDTO;
-import com.riseup.flimbit.entity.ShareType;
+import com.riseup.flimbit.entity.MovieShareType;
+import com.riseup.flimbit.entity.dto.ShareTypeDTO;
 
 import java.util.List;
 
-public interface ShareTypeRepository extends JpaRepository<ShareType, Long> {
-    List<ShareType> findByMovieId(Long movieId);
+public interface MovieShareTypeRepository extends JpaRepository<MovieShareType, Long> {
+    List<MovieShareType> findByMovieId(Long movieId);
     
     @Query(value = " select st.* , sum(mi.number_of_shares) as soldShare"
     		+",sum(mi.amount_invested) as soldAmount "

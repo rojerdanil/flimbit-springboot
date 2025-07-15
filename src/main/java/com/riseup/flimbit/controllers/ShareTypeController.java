@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.riseup.flimbit.constant.Messages;
-import com.riseup.flimbit.entity.ShareType;
+import com.riseup.flimbit.entity.MovieShareType;
 import com.riseup.flimbit.request.ShareTypeRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.service.ShareTypeService;

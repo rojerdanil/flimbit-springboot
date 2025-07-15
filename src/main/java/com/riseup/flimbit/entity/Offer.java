@@ -2,6 +2,8 @@ package com.riseup.flimbit.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,9 +14,9 @@ import java.time.LocalDateTime;
 @Builder
 public class Offer {
 
-    @Id
-    @Column(name = "offer_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_offer_id")
+	@SequenceGenerator(name = "seq_offer_id", sequenceName = "seq_offer_id", allocationSize = 1)
     private Long id;
 
     @Column(name = "offer_name", nullable = false)
@@ -26,11 +28,11 @@ public class Offer {
     @Column(name = "target_audience")
     private String targetAudience;
 
-    private String status = "Active";
+    private String status ;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private Timestamp updatedAt = new Timestamp(System.currentTimeMillis());
 }

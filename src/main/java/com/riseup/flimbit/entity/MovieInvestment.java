@@ -1,5 +1,6 @@
 package com.riseup.flimbit.entity;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import jakarta.persistence.Entity;
@@ -20,15 +21,16 @@ public class MovieInvestment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "movies_investment_seq")
 	@SequenceGenerator(name = "movies_investment_seq", sequenceName = "movies_investment_seq", allocationSize = 1)
-	long id;
+	int id;
 	int userId; 
 	int movieId; 
 	int  numberOfShares; 
-	int amountInvested;
+	BigDecimal amountInvested;
 	String status;
 	Timestamp investedAt = new Timestamp(System.currentTimeMillis());
 	Timestamp updatedDate = new Timestamp(System.currentTimeMillis());
-    int returnAmount;
+	BigDecimal returnAmount;
+	int shareTypeId;
 
 	
 

@@ -8,5 +8,5 @@ import com.riseup.flimbit.entity.UserWalletBalance;
 import java.util.Optional;
 @Repository
 public interface UserWalletBalanceRepository extends JpaRepository<UserWalletBalance, Long> {
-    Optional<UserWalletBalance> findByUserId(Long userId);
+    Optional<UserWalletBalance> findByUserId(int userId);
 }
