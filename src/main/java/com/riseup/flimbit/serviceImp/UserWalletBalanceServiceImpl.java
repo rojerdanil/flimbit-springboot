@@ -8,6 +8,7 @@ import com.riseup.flimbit.repository.UserWalletBalanceRepository;
 import com.riseup.flimbit.service.UserWalletBalanceService;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 @Service
 public class UserWalletBalanceServiceImpl implements UserWalletBalanceService {
@@ -32,7 +33,7 @@ public class UserWalletBalanceServiceImpl implements UserWalletBalanceService {
     public void addShareCash(int userId, BigDecimal amount) {
         UserWalletBalance wallet = getOrCreateWallet(userId);
         wallet.setShareCashBalance(wallet.getShareCashBalance().add(amount));
-        wallet.setLastUpdated(java.time.LocalDateTime.now());
+        wallet.setLastUpdated(new Timestamp(System.currentTimeMillis()));
         walletRepo.save(wallet);
     }
 
@@ -43,7 +44,7 @@ public class UserWalletBalanceServiceImpl implements UserWalletBalanceService {
             throw new RuntimeException("Insufficient wallet balance");
         }
         wallet.setShareCashBalance(wallet.getShareCashBalance().subtract(amount));
-        wallet.setLastUpdated(java.time.LocalDateTime.now());
+        wallet.setLastUpdated(new Timestamp(System.currentTimeMillis()));
         walletRepo.save(wallet);
     }
 

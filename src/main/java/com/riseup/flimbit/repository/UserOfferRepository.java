@@ -6,5 +6,7 @@ import org.springframework.stereotype.Repository;
 import com.riseup.flimbit.entity.UserOffer;
 
 @Repository
-public interface UserOfferRepository extends JpaRepository<UserOffer, Long> {
+public interface UserOfferRepository extends JpaRepository<UserOffer, Integer> {
+	
+	
 }

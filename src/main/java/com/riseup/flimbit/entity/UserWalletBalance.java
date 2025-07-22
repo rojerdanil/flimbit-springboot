@@ -3,6 +3,7 @@ package com.riseup.flimbit.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,5 +25,5 @@ public class UserWalletBalance {
     private BigDecimal shareCashBalance = BigDecimal.ZERO;
 
     @Column(name = "last_updated")
-    private LocalDateTime lastUpdated = LocalDateTime.now();
+    private Timestamp lastUpdated = new Timestamp(System.currentTimeMillis());
 }

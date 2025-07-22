@@ -21,6 +21,7 @@ import com.riseup.flimbit.entity.InvestmentSummary;
 import com.riseup.flimbit.entity.Movie;
 import com.riseup.flimbit.entity.MovieShareSummaryInterface;
 import com.riseup.flimbit.entity.MovieStatus;
+import com.riseup.flimbit.entity.dto.MovieDTO;
 import com.riseup.flimbit.repository.LanguageRepository;
 import com.riseup.flimbit.repository.MovieInvestRepository;
 import com.riseup.flimbit.repository.MovieStatusRepository;
@@ -180,8 +181,8 @@ public class MovieServiceImp implements MovieService{
 		
 	    int limit = 10;
 	    int offset = request.getStart();
-        System.out.println("keyword " +keyword  +" :limit:"+ limit + ":offset:" + offset);
-	    List<Movie> movieList = movieRepository.findMoviesWithSearch(keyword, limit, offset,language);
+        System.out.println("keyword Rojer :" +keyword  +" :limit:"+ limit + ":offset:" + offset);
+	    List<MovieDTO> movieList = movieRepository.findMoviesWithSearch(keyword, limit, offset,language);
 	    List<MovieDTOSummary> dtoList = new ArrayList<>();
 	    List<InvestmentSummary> investmentSummaryList = null;
 	    if(movieList !=null && movieList.size() > 0)
@@ -198,7 +199,8 @@ public class MovieServiceImp implements MovieService{
 		  movieToSharesSold =investmentSummaryList.stream()
 	     .collect(Collectors.toMap(InvestmentSummary::getMovieId, InvestmentSummary::getTotalShares));
 	    
-	    for (Movie movie : movieList) {
+	    for (MovieDTO movie : movieList) {
+	    	System.out.println("date " +movie.getCreatedDate());
 	        MovieDTOSummary dto = new MovieDTOSummary();
 	        BeanUtils.copyProperties(movie, dto); // Spring utility
 	        int total = movie.getBudget() / movie.getPerShareAmount();

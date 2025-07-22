@@ -32,8 +32,7 @@ public class AuditLog {
 
     private String description;
 
-    @Column(columnDefinition = "jsonb")
-    private String requestData;
+    private String 	requestData;
 
     private Timestamp createdAt;
 }

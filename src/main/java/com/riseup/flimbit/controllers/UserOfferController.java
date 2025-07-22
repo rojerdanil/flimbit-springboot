@@ -2,15 +2,20 @@ package com.riseup.flimbit.controllers;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.entity.UserOffer;
+import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.service.UserOfferService;
+import com.riseup.flimbit.utility.HttpResponseUtility;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user-offers")
+@RequestMapping("/user-offers")
 public class UserOfferController {
 
     @Autowired
@@ -27,12 +32,23 @@ public class UserOfferController {
     }
 
     @GetMapping("/{id}")
-    public UserOffer getById(@PathVariable Long id) {
+    public UserOffer getById(@PathVariable int id) {
         return service.getById(id);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable int id) {
         service.delete(id);
     }
+    
+    @GetMapping("/offersbyUser/{id}")
+    public ResponseEntity<?> getOffersByUserId(
+    		@PathVariable int id) {
+     	
+    	
+    	return null;
+
+        //return HttpResponseUtility.getHttpSuccess(offerService.findById(id)) ;
+    }
+
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.TokenResponse;
+import com.riseup.flimbit.service.TokenExpiryService;
 
 import java.security.Key;
 import java.util.Date;
@@ -43,7 +44,9 @@ public class JwtService {
 	}
 
 	private String createToken(Map<String, Object> claims, String email,boolean isRefreshToken) {
-		long timeNew = isRefreshToken ? refreshExpiryTime : expiryTime;
+		//long timeNew = isRefreshToken ? refreshExpiryTime : expiryTime;
+		long timeNew = isRefreshToken ? TokenExpiryService.getRefreshTokenExpiryTimeInSeconds() : TokenExpiryService.getTokenExpiryTime();;
+		
 		String claimType = isRefreshToken ? "refresh" : "access";
 		claims.put("type", claimType);
 		return Jwts.builder().setClaims(claims).setSubject(email).setIssuedAt(new Date())

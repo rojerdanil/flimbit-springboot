@@ -10,5 +10,6 @@ public enum EntityName {
     WITHDRAWAL,
     ANNOUNCEMENT,
     SYSTEM_SETTING,
-    AUDIT_LOG
+    AUDIT_LOG,
+    ACTOR
 }

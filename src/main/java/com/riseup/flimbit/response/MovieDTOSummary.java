@@ -28,6 +28,9 @@ public class MovieDTOSummary {
     private String shareSoldAmount; // e.g. ₹2,50,000 of ₹10,00,000
     private int fundingPercent;
     String activeStatus;
+    String languageName;
+    private Timestamp  updatedDate;
+    private String typeName;
     
 
     // Getters & setters...

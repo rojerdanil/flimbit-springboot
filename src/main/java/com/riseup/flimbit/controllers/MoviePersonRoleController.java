@@ -42,7 +42,7 @@ public class MoviePersonRoleController {
         service.delete(id);
     }
 
-    @GetMapping("/getAllRole")
+    @GetMapping("/allRole")
     public ResponseEntity<?>  findAll(@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken) {
@@ -56,7 +56,7 @@ public class MoviePersonRoleController {
  		}
          return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder()
          		.status(Messages.STATUS_SUCCESS)
-         		.message("Data reads")
+         		.message(Messages.STATUS_SUCCESS)
          		.result(service.findAll()).build());
     }
 }

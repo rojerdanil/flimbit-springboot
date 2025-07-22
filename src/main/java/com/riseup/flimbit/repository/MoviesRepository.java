@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import com.riseup.flimbit.entity.Movie;
 import com.riseup.flimbit.entity.MovieShareSummaryInterface;
 import com.riseup.flimbit.entity.User;
+import com.riseup.flimbit.entity.dto.MovieDTO;
 
 public interface MoviesRepository extends JpaRepository<Movie, Long> {
 	
@@ -45,9 +46,9 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
     
     
     @Query(value = """
-    	    SELECT s.* FROM movies s	
+    	    SELECT s.*,lan.name as languageName,mv.name as typeName FROM movies s	
     	    join languages lan on lan.id = s.language	
-
+            join movie_types mv on mv.id = s.movie_type_id
     	    WHERE 
     	        (:keyword IS NULL OR :keyword = '' 
     	         OR LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
@@ -56,7 +57,7 @@ public interface MoviesRepository extends JpaRepository<Movie, Long> {
     	    ORDER BY created_date DESC
     	    LIMIT :limit OFFSET :offset
     	""", nativeQuery = true)
-    	List<Movie> findMoviesWithSearch(
+    	List<MovieDTO> findMoviesWithSearch(
     	    @Param("keyword") String keyword,
     	    @Param("limit") int limit,
     	    @Param("offset") int offset,

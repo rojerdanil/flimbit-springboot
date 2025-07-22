@@ -1,12 +1,9 @@
 package com.riseup.flimbit.serviceImp;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,34 +13,39 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.riseup.flimbit.constant.ActionType;
+import com.riseup.flimbit.constant.EntityName;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.constant.PromotionTypeEnum;
 import com.riseup.flimbit.constant.StatusEnum;
-import com.riseup.flimbit.entity.UserStatus;
 import com.riseup.flimbit.entity.PromoCode;
 import com.riseup.flimbit.entity.PromotionType;
 import com.riseup.flimbit.entity.ReferralTracking;
 import com.riseup.flimbit.entity.User;
 import com.riseup.flimbit.entity.UserPromoCode;
+import com.riseup.flimbit.entity.UserStatus;
+import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
 import com.riseup.flimbit.repository.PromoCodeRepository;
 import com.riseup.flimbit.repository.PromotionTypeRepository;
 import com.riseup.flimbit.repository.ReferralTrackingRepository;
 import com.riseup.flimbit.repository.UserPromoCodeRepository;
 import com.riseup.flimbit.repository.UserRepository;
 import com.riseup.flimbit.repository.UserStatusRespository;
-import com.riseup.flimbit.repository.UserWalletBalanceRepository;
 import com.riseup.flimbit.request.PhoneRegValidateRequest;
 import com.riseup.flimbit.request.PhoneRegisterRequest;
 import com.riseup.flimbit.request.RefreshTokenRequest;
+import com.riseup.flimbit.request.StatusRequest;
 import com.riseup.flimbit.request.UserRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.PhoneOtpResponse;
 import com.riseup.flimbit.response.TokenResponse;
+import com.riseup.flimbit.security.UserContextHolder;
 import com.riseup.flimbit.service.UserRegisterService;
 import com.riseup.flimbit.service.UserWalletBalanceService;
 import com.riseup.flimbit.utility.CodeGenerator;
@@ -82,6 +84,9 @@ public class UserRegisterServiceImp implements UserRegisterService {
 	@Autowired
 	ReferralTrackingRepository referralTrackingRepository;
 
+	@Autowired
+	AuditLogServiceImp audit;
+	
 	@Override
 	public CommonResponse generateRegPhoneOtp(PhoneRegisterRequest phoneRegRequest) {
 		// TODO Auto-generated method stub
@@ -227,10 +232,10 @@ public class UserRegisterServiceImp implements UserRegisterService {
 		if (Optional.ofNullable(promoType).isPresent()) {
 
 			PromoCode promo = PromoCode.builder().promoCode("Welcome Promo " + user.getId())
-					//.promoType(promoType.getTypeCode()).usesLeft(promoType.getUserCount())
-					//.expiryDate(Date.valueOf(LocalDate.now().plusDays(promoType.getExpiryDays())))
+					// .promoType(promoType.getTypeCode()).usesLeft(promoType.getUserCount())
+					// .expiryDate(Date.valueOf(LocalDate.now().plusDays(promoType.getExpiryDays())))
 					.status(StatusEnum.INACTIVE.getDescription().toLowerCase())
-					//.promoTypeId(Integer.parseInt(promoType.getId() + ""))
+					// .promoTypeId(Integer.parseInt(promoType.getId() + ""))
 					.createdAt(new Timestamp(System.currentTimeMillis()))
 					.updatedAt(new Timestamp(System.currentTimeMillis())).build();
 
@@ -294,8 +299,8 @@ public class UserRegisterServiceImp implements UserRegisterService {
 		System.out.println(" applyReferralCodeDuringSignup ");
 
 		if (promo != null) {
-			if (!promo.getStatus().equalsIgnoreCase("Active") ) {
-				
+			if (!promo.getStatus().equalsIgnoreCase("Active")) {
+
 				if (promo.getStatus().equalsIgnoreCase(StatusEnum.ACTIVE.name())) {
 
 					promo.setStatus(StatusEnum.INACTIVE.name().toLowerCase());
@@ -364,6 +369,39 @@ public class UserRegisterServiceImp implements UserRegisterService {
 			return CommonResponse.builder().status(Messages.STATUS_FAILURE).message(Messages.REG_PHONE_NUMBER_NOT_FOUND)
 					.build();
 
+	}
+
+	@Override
+	public Page<UserWithStatusDTO> fetchAllUsersWithStatus(int language, int movie, String status, String searchText,
+			int start, int length, String sortColumn, String sortOrder) {
+		// TODO Auto-generated method stub
+
+		int page = start / length;
+		Sort sort = Sort.by(Sort.Direction.fromString(sortOrder), sortColumn);
+		Pageable pageable = PageRequest.of(page, length, sort);
+
+		return userRepository.fetchAllUsersWithStatus(language, movie, status, searchText, pageable);
+	}
+
+	@Transactional
+	@Override
+	public User updateUserStatus(StatusRequest statusReq) {
+		// TODO Auto-generated method stub
+		User user = userRepository.findById(statusReq.getId())
+				.orElseThrow(() -> new RuntimeException("User is not found " + statusReq.getId()));
+		if (user.getStatus().equalsIgnoreCase(statusReq.getStatus()))
+			throw new RuntimeException("Same status can be changed");
+
+		audit.logAction(UserContextHolder.getContext().getUserId(),ActionType.UPDATE.name()
+				, EntityName.USER.name(), user.getId(), " user status changed from " + user.getStatus()  +" to " + statusReq.getStatus(), statusReq);
+
+		
+		user.setStatus(statusReq.getStatus().toLowerCase());
+		user.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+		
+		
+	
+		return userRepository.save(user);
 	}
 
 }

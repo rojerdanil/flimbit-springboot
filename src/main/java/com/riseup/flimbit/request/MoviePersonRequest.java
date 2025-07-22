@@ -7,7 +7,6 @@ import lombok.Setter;
 @Setter
 
 public class MoviePersonRequest {
-	    private Integer id;
 	    private String name;
 	    private String gender;
         private String imageUrl;

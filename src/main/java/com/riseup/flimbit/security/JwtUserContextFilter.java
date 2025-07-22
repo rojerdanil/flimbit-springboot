@@ -44,6 +44,7 @@ public class JwtUserContextFilter extends OncePerRequestFilter {
         UserContext context = UserContext.builder().name("admin")
         		.userId(0).phone("9999123").build();
         
+        UserContextHolder.setContext(context);
        
 
         try {

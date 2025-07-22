@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.riseup.flimbit.entity.UserOffer;
+import com.riseup.flimbit.entity.dto.UserOfferDto;
 import com.riseup.flimbit.repository.UserOfferRepository;
 import com.riseup.flimbit.service.UserOfferService;
 
@@ -26,12 +27,18 @@ public class UserOfferServiceImpl implements UserOfferService {
     }
 
     @Override
-    public UserOffer getById(Long id) {
+    public UserOffer getById(int id) {
         return repository.findById(id).orElse(null);
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(int id) {
         repository.deleteById(id);
     }
+
+	@Override
+	public List<UserOfferDto> getUserOfferByUserId(int id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

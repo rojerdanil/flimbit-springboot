@@ -11,5 +11,7 @@ public enum TargetAudience {
 	    LOCATION_BASED,
 	    REFERRAL_USERS,
 	    PROMO_CODE_USERS,
-	    LIMITED_GROUP
+	    LIMITED_GROUP,
+	    INFFLUENCER
 }
+

@@ -37,22 +37,17 @@ public class CommonUtilty {
 	{
 		return Optional.ofNullable(name).filter(s -> !s.isEmpty()).isPresent();
 	}
-	public static MoviePerson mapMovPersonReqToMoviePerson(MoviePersonRequest movPerReq)
+	public static MoviePerson mapMovPersonReqToMoviePerson(MoviePersonRequest movPerReq,MoviePerson moviePerson)
 	{
 
 		if(Optional.ofNullable(movPerReq).isPresent())
 		{
-			MoviePerson moviePerson = new MoviePerson();
-			if(movPerReq.getId() != 0)
-			moviePerson.setId(moviePerson.getId());
             if(checkEmptyOrNull(movPerReq.getName() ))
             	moviePerson.setName(movPerReq.getName());
             if(checkEmptyOrNull(movPerReq.getGender() ))
             	moviePerson.setGender(movPerReq.getGender());
             if(checkEmptyOrNull(movPerReq.getImageUrl() ))
             	moviePerson.getImageUrl();
-			if(movPerReq.getAwardsCount() != 0)
-				moviePerson.setAwardsCount(movPerReq.getAwardsCount());
 			if(movPerReq.getLanguage() != 0)
 			{
 
@@ -60,8 +55,10 @@ public class CommonUtilty {
 			}
 			if(movPerReq.getRole() != 0)
 				moviePerson.setRole(movPerReq.getRole());
-			if(movPerReq.getPopularityScore() != 0)
+			
 				moviePerson.setPopularityScore(movPerReq.getPopularityScore());
+				moviePerson.setAwardsCount(movPerReq.getAwardsCount());
+
 
              return moviePerson;	
 		}
