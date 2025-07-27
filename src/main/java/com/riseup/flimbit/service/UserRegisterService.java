@@ -24,6 +24,12 @@ public interface UserRegisterService {
 			String sortColumn, String sortOrder);
 	
 	User updateUserStatus(StatusRequest statusReq);
+	
+	public CommonResponse  validateOtp(String authHeader,String deviceId);
+	
+	
+	
+	//
 
 
 }

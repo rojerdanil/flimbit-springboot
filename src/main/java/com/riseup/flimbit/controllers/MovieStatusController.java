@@ -1,7 +1,5 @@
 package com.riseup.flimbit.controllers;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -20,44 +18,32 @@ import java.util.List;
 @RestController
 @RequestMapping("/movie-status")
 public class MovieStatusController {
+
 	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
+	private MovieStatusService service;
 
-    @Autowired
-    private MovieStatusService service;
+	@PostMapping
+	public MovieStatus create(@RequestBody MovieStatus status) {
+		return service.create(status);
+	}
 
-    @PostMapping
-    public MovieStatus create(@RequestBody MovieStatus status) {
-        return service.create(status);
-    }
+	@PutMapping("/{id}")
+	public MovieStatus update(@PathVariable Integer id, @RequestBody MovieStatus status) {
+		return service.update(id, status);
+	}
 
-    @PutMapping("/{id}")
-    public MovieStatus update(@PathVariable Integer id, @RequestBody MovieStatus status) {
-        return service.update(id, status);
-    }
+	@DeleteMapping("/{id}")
+	public void delete(@PathVariable Integer id) {
+		service.delete(id);
+	}
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id) {
-        service.delete(id);
-    }
+	@GetMapping("/allstatus")
+	public ResponseEntity<?> findAll(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken) {
 
-    @GetMapping("/allstatus")
-    public ResponseEntity<?> findAll(@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken
-    		) {
-    	
-    	if(isValidateTokenEnable)
-		{	
-    		CommonResponse	 commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(service.findAll()).build());
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(service.findAll()).build());
 
-         
-    }
+	}
 }

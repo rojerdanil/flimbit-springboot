@@ -11,5 +11,6 @@ public class UserContext {
 	private int userId;
     private String phone;
     private String name;
+    private String type;
 
 }

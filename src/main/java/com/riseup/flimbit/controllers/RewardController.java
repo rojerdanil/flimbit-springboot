@@ -43,11 +43,6 @@ public class RewardController {
 	
 	
 
-    @Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
-
 	@Autowired
 	PromotionRewardService promotionRewardService;
 	
@@ -65,13 +60,6 @@ public class RewardController {
 	) {
 		
 		
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
     	
 	    Page<PromotionReward> page = promotionRewardService.getPaginated(start, length, searchText, sortColumn, sortOrder);
 	    Map<String, Object> response = new HashMap<>();
@@ -88,13 +76,6 @@ public class RewardController {
 	    		@RequestHeader(value="phoneNumber") String phoneNumber,
 	    		@RequestHeader(value="accessToken") String accessToken,
 	    		@RequestBody PromotionRewardRequest promotionRewardReq) {
-	    	if(isValidateTokenEnable)
-			{	
-			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-	           if (commonToken.getStatus() != Messages.SUCCESS) {
-		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-		        }
-			}
 	    	
 	    	
 	        return  HttpResponseUtility.getHttpSuccess(promotionRewardService.createReward(promotionRewardReq));
@@ -122,14 +103,6 @@ public class RewardController {
 	    		@RequestHeader(value="accessToken") String accessToken,
 	    		@RequestBody PromotionRewardRequest promotionRewardReq,
 	    		@PathVariable Long id) {
-	    	if(isValidateTokenEnable)
-			{	
-			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-	           if (commonToken.getStatus() != Messages.SUCCESS) {
-		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-		        }
-			}
-	    	
 	    	
 	        return  HttpResponseUtility.getHttpSuccess(promotionRewardService.updateReward(id,promotionRewardReq));
 	    	
@@ -140,14 +113,12 @@ public class RewardController {
 	    		@RequestHeader(value="phoneNumber") String phoneNumber,
 	    		@RequestHeader(value="accessToken") String accessToken,
 	    		@PathVariable Long id) {
-	    	if(isValidateTokenEnable)
-			{	
-			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-	           if (commonToken.getStatus() != Messages.SUCCESS) {
-		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-		        }
-			}
-	    	promotionRewardService.deleteById(id);
+			/*
+			 * if(isValidateTokenEnable) { CommonResponse commonToken =
+			 * jwtService.validateToken(accessToken, deviceId, phoneNumber); if
+			 * (commonToken.getStatus() != Messages.SUCCESS) { return
+			 * ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken); } }
+			 */	    	promotionRewardService.deleteById(id);
 	        return HttpResponseUtility.getHttpSuccess("deleted successfully");
 
 	    }
@@ -156,14 +127,7 @@ public class RewardController {
 	    public ResponseEntity<?> delete(@RequestHeader(value="deviceId") String deviceId,
 	    		@RequestHeader(value="phoneNumber") String phoneNumber,
 	    		@RequestHeader(value="accessToken") String accessToken) {
-	    	if(isValidateTokenEnable)
-			{	
-			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-	           if (commonToken.getStatus() != Messages.SUCCESS) {
-		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-		        }
-			}
-	    	
+	   	
 	    	List<KeyValueDtoResponse> types = Arrays.stream(RewardType.values())
 	                .map(rt -> new KeyValueDtoResponse(rt.name(), rt.getLabel()))
 	                .collect(Collectors.toList());
@@ -188,15 +152,7 @@ public class RewardController {
  	    		@RequestHeader(value="accessToken") String accessToken,
  	    		@PathVariable Long id) {
     		 
-    			if(isValidateTokenEnable)
-    			{	
-    			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-    	           if (commonToken.getStatus() != Messages.SUCCESS) {
-    		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-    		        }
-    			}
- 	     
- 	        return HttpResponseUtility.getHttpSuccess(promotionRewardService.getRewardsByPromotionTypeAndStatus(id,StatusEnum.ACTIVE.getDescription()));
+    	 	        return HttpResponseUtility.getHttpSuccess(promotionRewardService.getRewardsByPromotionTypeAndStatus(id,StatusEnum.ACTIVE.getDescription()));
 
  	    }
 }

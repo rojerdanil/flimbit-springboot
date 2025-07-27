@@ -43,63 +43,18 @@ public class UserLoginController {
 	@Autowired
 	UserRegisterService userRegisterService;
 	
-	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
-	
 	@GetMapping("/")
 	public String getMsg()
 	{
 		return "FlimBit service is running";
 	}
 	
-	@PostMapping(path= "/sendregotp", consumes = "application/json", produces = "application/json")
-	ResponseEntity<Object> generatePhoneOtpForRegister(@RequestBody PhoneRegisterRequest phoneValidateRequest)
-	{
-		
-		return new ResponseEntity<>(userRegisterService.generateRegPhoneOtp(phoneValidateRequest),HttpStatus.OK);
-
-		
-	}
-	
-	@PostMapping(path= "/validateRegOtp", consumes = "application/json", produces = "application/json")
-	ResponseEntity<Object> validateRegOtpPhone(@RequestHeader(value="deviceId") String deviceId,@RequestBody PhoneRegValidateRequest phoneValidateRequest)
-	{
-		
-		return new ResponseEntity<>(userRegisterService.validateRegPhoneOtp(phoneValidateRequest,deviceId),HttpStatus.OK);
-
-		
-	}
-	
-	@PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,@RequestBody RefreshTokenRequest refreshRequest) {
-        CommonResponse commonToken = userRegisterService.genRefreshToken(deviceId, phoneNumber, refreshRequest);
-
-        if (commonToken.getStatus() != Messages.SUCCESS) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-        }
-
-		return ResponseEntity.status(HttpStatus.OK).body(commonToken);
-		
-       
-        
-    }
-	@PostMapping("/updateUser")
+		@PostMapping("/updateUser")
     public ResponseEntity<?> refresh(@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		@RequestBody UserRequest userRequest)
     {
-		logger.info("isValidateTokenEnable "+ isValidateTokenEnable);
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 		return ResponseEntity.status(HttpStatus.OK).body(userRegisterService.updateUser(userRequest,phoneNumber));
 
     }

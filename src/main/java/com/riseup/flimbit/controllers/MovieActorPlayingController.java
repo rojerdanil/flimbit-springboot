@@ -23,10 +23,6 @@ public class MovieActorPlayingController {
 	Logger logger
     = LoggerFactory.getLogger(MovieActorPlayingController.class);
 	
-	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
 	
 	@Autowired
 	private MovieActorService service;
@@ -37,18 +33,7 @@ public class MovieActorPlayingController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		@RequestBody MovieActorRequest actor) {
-	
-		
-		
-		 
-				if(isValidateTokenEnable)
-				{	
-				 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-		           if (commonToken.getStatus() != Messages.SUCCESS) {
-			            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-			        }
-				}
-				
+			
 		        return ResponseEntity.status(HttpStatus.OK).body(service.create(actor));
 		
 	}
@@ -63,13 +48,6 @@ public class MovieActorPlayingController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		 @RequestParam("id") int id) {
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 		service.delete(id);
 		CommonResponse commRes = CommonResponse.builder().status(Messages.STATUS_SUCCESS)
 				.build();
@@ -82,13 +60,6 @@ public class MovieActorPlayingController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		 @RequestParam("id") int id) {
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 		return ResponseEntity.status(HttpStatus.OK).body(service.getAllRoleByMovieId(id));
 	}
 }

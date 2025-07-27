@@ -18,11 +18,6 @@ import java.util.List;
 @RequestMapping("/movie-types")
 public class MovieTypeController {
 	
-	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
-
     @Autowired
     private MovieTypeService movieTypeService;
 
@@ -52,13 +47,6 @@ public class MovieTypeController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken) {
     	
-    	if(isValidateTokenEnable)
-		{	
-    		CommonResponse	 commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(movieTypeService.getAllMovieTypes()).build());
 
          

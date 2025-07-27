@@ -25,139 +25,76 @@ import java.util.Map;
 @RequestMapping("/promo-codes")
 public class PromoCodeController {
 
-    @Autowired
-    private PromoCodeService promoCodeService;
-    
-    
-    @Autowired
-  	JwtService jwtService;
-  	@Value("${isValidateTokenEnable}")
-      boolean isValidateTokenEnable;
-  	
-  	
+	@Autowired
+	private PromoCodeService promoCodeService;
 
-    @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@RequestBody PromoRewardMapRequest promoCode) {
-    	
-    	
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-    	
-        return HttpResponseUtility.getHttpSuccess(promoCodeService.savePromoCodeRewards(promoCode));
-    
-    }
-    
+	@PostMapping("/create")
+	public ResponseEntity<?> create(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestBody PromoRewardMapRequest promoCode) {
 
-    @GetMapping
-    public List<PromoCode> getAll() {
-        return promoCodeService.getAll();
-    }
+		return HttpResponseUtility.getHttpSuccess(promoCodeService.savePromoCodeRewards(promoCode));
 
-    @GetMapping("/{id}")
-    public PromoCode getById(@PathVariable Long id) {
-        return promoCodeService.getById(id);
-    }
-
-    @GetMapping("/code/{promoCode}")
-    public PromoCode getByCode(@PathVariable String promoCode) {
-        return promoCodeService.getByCode(promoCode)
-        		.orElseThrow(() -> new RuntimeException("Promo Code not found "+ promoCode));
-    }
-
-    @GetMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@PathVariable Long id) {
-      	if(isValidateTokenEnable)
-    			{	
-    			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-    	           if (commonToken.getStatus() != Messages.SUCCESS) {
-    		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-    		        }
-    			}
-    	    
-        promoCodeService.delete(id);
-        return HttpResponseUtility.getHttpSuccess("deleted successfully");
-
-    }
-    
-	@GetMapping("/page")
-	public ResponseEntity<?> getPaginatedRewards(
-			@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-	        @RequestParam int draw,
-	        @RequestParam int start,
-	        @RequestParam int length,
-	        @RequestParam(required = false) String searchText,
-	        @RequestParam(defaultValue = "id") String sortColumn,
-	        @RequestParam(defaultValue = "asc") String sortOrder
-	) {
-		
-		
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-    	
-	    Page<PromoCode> page = promoCodeService.getPaginated(start, length, searchText, sortColumn, sortOrder);
-	    Map<String, Object> response = new HashMap<>();
-        response.put("draw", draw);
-        response.put("recordsTotal", page.getTotalElements());
-        response.put("recordsFiltered", page.getTotalElements());
-        response.put("data", page.getContent());
-        return HttpResponseUtility.getHttpSuccess(response);
 	}
 
-	
-	 @PostMapping("/createPromoCode")
-	    public ResponseEntity<?> createPromoCode(@RequestHeader(value="deviceId") String deviceId,
-	    		@RequestHeader(value="phoneNumber") String phoneNumber,
-	    		@RequestHeader(value="accessToken") String accessToken,
-	    		@RequestBody PromoCodeRequest promoCode) {
-	    	
-	    	
-	    	if(isValidateTokenEnable)
-			{	
-			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-	           if (commonToken.getStatus() != Messages.SUCCESS) {
-		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-		        }
-			}
-	    	
-	        return HttpResponseUtility.getHttpSuccess(promoCodeService.savePromoCode(promoCode));
-	    
-	    }
-	 
-	 @PostMapping("/updatePromoCode")
-	    public ResponseEntity<?> updatePromoCode(@RequestHeader(value="deviceId") String deviceId,
-	    		@RequestHeader(value="phoneNumber") String phoneNumber,
-	    		@RequestHeader(value="accessToken") String accessToken,
-	    		@RequestBody PromoCodeRequest promoCode) {
-	    	
-	    	
-	    	if(isValidateTokenEnable)
-			{	
-			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-	           if (commonToken.getStatus() != Messages.SUCCESS) {
-		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-		        }
-			}
-	    	
-	        return HttpResponseUtility.getHttpSuccess(promoCodeService.updatePromoCode(promoCode));
-	    
-	    }
-    
+	@GetMapping
+	public List<PromoCode> getAll() {
+		return promoCodeService.getAll();
+	}
+
+	@GetMapping("/{id}")
+	public PromoCode getById(@PathVariable Long id) {
+		return promoCodeService.getById(id);
+	}
+
+	@GetMapping("/code/{promoCode}")
+	public PromoCode getByCode(@PathVariable String promoCode) {
+		return promoCodeService.getByCode(promoCode)
+				.orElseThrow(() -> new RuntimeException("Promo Code not found " + promoCode));
+	}
+
+	@GetMapping("/delete/{id}")
+	public ResponseEntity<?> delete(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @PathVariable Long id) {
+		promoCodeService.delete(id);
+		return HttpResponseUtility.getHttpSuccess("deleted successfully");
+
+	}
+
+	@GetMapping("/page")
+	public ResponseEntity<?> getPaginatedRewards(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestParam int draw, @RequestParam int start,
+			@RequestParam int length, @RequestParam(required = false) String searchText,
+			@RequestParam(defaultValue = "id") String sortColumn,
+			@RequestParam(defaultValue = "asc") String sortOrder) {
+
+		Page<PromoCode> page = promoCodeService.getPaginated(start, length, searchText, sortColumn, sortOrder);
+		Map<String, Object> response = new HashMap<>();
+		response.put("draw", draw);
+		response.put("recordsTotal", page.getTotalElements());
+		response.put("recordsFiltered", page.getTotalElements());
+		response.put("data", page.getContent());
+		return HttpResponseUtility.getHttpSuccess(response);
+	}
+
+	@PostMapping("/createPromoCode")
+	public ResponseEntity<?> createPromoCode(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestBody PromoCodeRequest promoCode) {
+
+		return HttpResponseUtility.getHttpSuccess(promoCodeService.savePromoCode(promoCode));
+
+	}
+
+	@PostMapping("/updatePromoCode")
+	public ResponseEntity<?> updatePromoCode(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestBody PromoCodeRequest promoCode) {
+
+		return HttpResponseUtility.getHttpSuccess(promoCodeService.updatePromoCode(promoCode));
+
+	}
+
 }

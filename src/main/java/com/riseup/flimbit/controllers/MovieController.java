@@ -51,10 +51,6 @@ public class MovieController {
 	Logger logger
     = LoggerFactory.getLogger(MovieController.class);
 	
-	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
 	
 	@Autowired
 	MovieService movieService;
@@ -76,13 +72,7 @@ public class MovieController {
     		@RequestBody MovieSearchRequest movieSearchRequest
     		)
     {
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
+		
 		
         return ResponseEntity.status(HttpStatus.OK).body(movieService.getMoviesByLanguage(movieSearchRequest));
     }
@@ -94,14 +84,7 @@ public class MovieController {
     		@RequestHeader(value="accessToken") String accessToken,
     		@RequestBody MovieRequest movieRequest)
     {
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(movieService.updateMovie(movieRequest));
+		   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(movieService.updateMovie(movieRequest));
     }
 	
 	@PostMapping(value ="/addMovie",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -111,15 +94,7 @@ public class MovieController {
     		@RequestPart("movie") MovieRequest movieRequest,
     		@RequestPart(value = "poster", required = false) MultipartFile posterFile)
     {
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-		System.out.println("is Edit " + movieRequest.isEdit());
-		
+				
 		if(!movieRequest.isEdit())
 		{
 			System.out.println("it is insert");
@@ -166,13 +141,7 @@ public class MovieController {
     		@RequestHeader(value="accessToken") String accessToken,
     		@RequestBody DeleteRequest movieIds)
     {
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
+		
         return ResponseEntity.status(HttpStatus.OK).body(movieService.deleteMovie(movieIds.getIdsList()));
     }
 
@@ -181,13 +150,7 @@ public class MovieController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		@RequestBody DataTableRequest request) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
+    	
         return ResponseEntity.status(HttpStatus.OK).body(movieService.getMoviesForDataTable(request));
     }
     
@@ -198,13 +161,7 @@ public class MovieController {
     		@RequestHeader(value="accessToken") String accessToken,
     		 @RequestParam("id") int id
     		) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
+    	
         return ResponseEntity.status(HttpStatus.OK).body(movieService.findMovieSummaryById(id));
     }
     
@@ -215,13 +172,7 @@ public class MovieController {
     		@RequestHeader(value="accessToken") String accessToken,
     		 @RequestParam("id") int id
     		) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
+    	
         return ResponseEntity.status(HttpStatus.OK).body(movieService.findMovieEnityById(id));
     }
     		
@@ -232,13 +183,7 @@ public class MovieController {
     		@RequestHeader(value="accessToken") String accessToken,
     		@PathVariable("id") int id
     		) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
+    	
         return HttpResponseUtility.getHttpSuccess(movieService.getMovieByLanguage(id));
     }		
     		

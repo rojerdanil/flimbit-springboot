@@ -43,15 +43,22 @@ public class JwtService {
 		return createToken(claims, userDeviceId,isRefreshToken);
 	}
 
-	private String createToken(Map<String, Object> claims, String email,boolean isRefreshToken) {
-		//long timeNew = isRefreshToken ? refreshExpiryTime : expiryTime;
-		long timeNew = isRefreshToken ? TokenExpiryService.getRefreshTokenExpiryTimeInSeconds() : TokenExpiryService.getTokenExpiryTime();;
-		
-		String claimType = isRefreshToken ? "refresh" : "access";
-		claims.put("type", claimType);
-		return Jwts.builder().setClaims(claims).setSubject(email).setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + timeNew))
-				.signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+	private String createToken(Map<String, Object> claims, String email, boolean isRefreshToken) {
+	    long timeNew = isRefreshToken 
+	        ? TokenExpiryService.getRefreshTokenExpiryTimeInSeconds() 
+	        : TokenExpiryService.getTokenExpiryTime(); // assume both return in seconds
+
+
+	    String claimType = isRefreshToken ? "refresh" : "access";
+	    claims.put("type", claimType);
+
+	    return Jwts.builder()
+	        .setClaims(claims)
+	        .setSubject(email)
+	        .setIssuedAt(new Date())
+	        .setExpiration(new Date(System.currentTimeMillis() + timeNew * 1000)) // ✅ FIXED
+	        .signWith(getSignKey(), SignatureAlgorithm.HS256)
+	        .compact();
 	}
 
 	private Key getSignKey() {
@@ -85,8 +92,9 @@ public class JwtService {
 		try {
 			final String username = extractUsername(token);
 			System.out.println("username :" + username + " : log :" + userName + ":" + deviceId);
+	    	 String tokenKey =userName +":"+ deviceId;
 
-			boolean isValid = (username.equals(userName + ":" + deviceId) && !isTokenExpired(token));
+			boolean isValid = (username.equals(tokenKey) && !isTokenExpired(token));
 		 System.out.println("is valid "+isValid);
 			if (isValid) {
 				common.setStatus(Messages.SUCCESS);

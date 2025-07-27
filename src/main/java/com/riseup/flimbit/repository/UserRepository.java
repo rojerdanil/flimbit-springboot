@@ -116,6 +116,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 		    ORDER BY d
 		""", nativeQuery = true)
 		List<ChartProjectionDTO> getMonthlyUserRegistrationChart();
-
+	
+	
 
 }
+ 

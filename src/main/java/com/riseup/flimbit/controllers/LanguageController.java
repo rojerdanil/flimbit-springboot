@@ -23,10 +23,7 @@ public class LanguageController {
 	Logger logger
     = LoggerFactory.getLogger(LanguageController.class);
 	
-	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
+	
 	@Autowired
     LanguageService languageService;
 
@@ -35,13 +32,7 @@ public class LanguageController {
     public ResponseEntity<?> getAllLanguages(@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
+    	
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SUCCESS).result(languageService.getAllLanguages()).build());
     }
 

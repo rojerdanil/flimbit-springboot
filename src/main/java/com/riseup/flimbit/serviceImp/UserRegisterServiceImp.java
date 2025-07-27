@@ -17,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.riseup.flimbit.constant.ActionType;
@@ -50,6 +52,7 @@ import com.riseup.flimbit.service.UserRegisterService;
 import com.riseup.flimbit.service.UserWalletBalanceService;
 import com.riseup.flimbit.utility.CodeGenerator;
 import com.riseup.flimbit.utility.CommonUtilty;
+import com.riseup.flimbit.utility.HttpResponseUtility;
 import com.riseup.flimbit.utility.JwtService;
 
 import jakarta.transaction.Transactional;
@@ -402,6 +405,33 @@ public class UserRegisterServiceImp implements UserRegisterService {
 		
 	
 		return userRepository.save(user);
+	}
+
+	@Override
+	public CommonResponse validateOtp(String authHeader,String deviceId) {
+		// TODO Auto-generated method stub
+		CommonResponse response = null ;
+        try {
+            // Extract token from "Bearer <token>"
+        	 String token = authHeader.replace("Bearer ", "").trim();
+             if(token == null || token.trim().length()==0)
+                  return null;        	 
+        	 
+            // Extract username/email/device from token (depending on how you built it)
+            String usernameOrEmail = jwtService.extractUsername(token);
+
+            // Call your custom validation method
+            response = jwtService.validateToken(token, deviceId, usernameOrEmail);
+            
+	
+            	
+
+        } catch (Exception ex) {
+            response.setStatus("FAILURE");
+            response.setMessage("Invalid or malformed token");
+              }
+
+		return response;
 	}
 
 }

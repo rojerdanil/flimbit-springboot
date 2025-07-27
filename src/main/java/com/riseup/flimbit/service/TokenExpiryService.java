@@ -37,10 +37,10 @@ public class TokenExpiryService {
         
         if (refreshTokenExpiryProperty.isPresent()) {
         	refreshTokenExpiryTimeInSeconds = Long.parseLong(refreshTokenExpiryProperty.get().getPropertyValue());
-            System.out.println("Token expiry time loaded from DB: " + refreshTokenExpiryTimeInSeconds + " seconds");
+            System.out.println("Refresh Token expiry time loaded from DB: " + refreshTokenExpiryTimeInSeconds + " seconds");
         } else {
             // Handle the case where the property is not found in DB
-            System.out.println("Token expiry time not found in DB. Using default.");
+            System.out.println("Refresh Token expiry time not found in DB. Using default.");
             refreshTokenExpiryTimeInSeconds = 604800000;  // default value in case the property is missing
         }
         

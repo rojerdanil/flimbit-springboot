@@ -27,10 +27,6 @@ import com.riseup.flimbit.utility.JwtService;
 @RequestMapping("/promotion-rewards-map")
 public class PromotionRewardMapController {
 	
-	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
 	
 	@Autowired
 	PromotionRewardMapService promoRewardMapService;
@@ -50,12 +46,6 @@ public class PromotionRewardMapController {
     		@PathVariable Long promoId
 
     ) {
-        if (isValidateTokenEnable) {
-            CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-            if (commonToken.getStatus() != Messages.SUCCESS) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-            }
-        }
 
         Page<PromotionRewardMapDTO> page = promoRewardMapService.getPaginated(promoId,start, length, searchText, sortColumn, sortOrder);
 
@@ -73,13 +63,6 @@ public class PromotionRewardMapController {
 	    		@RequestHeader(value="phoneNumber") String phoneNumber,
 	    		@RequestHeader(value="accessToken") String accessToken,
 	    		@PathVariable Long id) {
-	    	if(isValidateTokenEnable)
-			{	
-			 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-	           if (commonToken.getStatus() != Messages.SUCCESS) {
-		            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-		        }
-			}
 	    	promoRewardMapService.deleteById(id);
 	        return HttpResponseUtility.getHttpSuccess("deleted successfully");
 

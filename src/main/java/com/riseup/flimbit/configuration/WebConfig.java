@@ -10,8 +10,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**") // allow all endpoints
                 .allowedOrigins("http://localhost", "http://localhost:80") // allow all origins (not recommended in production)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(false);
+                .allowedHeaders("Authorization", "Content-Type", "accesstoken", "deviceid", "phonenumber","x-device-id","x-device-type") // Explicitly list headers
+                .allowCredentials(true);
     }
 
 }
+

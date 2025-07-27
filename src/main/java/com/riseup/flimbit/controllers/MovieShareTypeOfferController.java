@@ -20,10 +20,6 @@ import java.util.List;
 @RequestMapping("/offer-mappings")
 public class MovieShareTypeOfferController {
 	
-	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
 
     @Autowired
     private OfferShareTypeMovieService service;
@@ -36,13 +32,6 @@ public class MovieShareTypeOfferController {
     		@RequestBody MovieShareOfferRequest movieShareOfferRequest) {
         
     	
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 	
     	return HttpResponseUtility.getHttpSuccess(service.save(movieShareOfferRequest));
     	
@@ -56,14 +45,6 @@ public class MovieShareTypeOfferController {
     		@RequestBody MovieShareOfferRequest movieShareOfferRequest,
     		@PathVariable Long id) {
         
-    	
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 	
     	return HttpResponseUtility.getHttpSuccess(service.update(id,movieShareOfferRequest));
     	
@@ -81,13 +62,6 @@ public class MovieShareTypeOfferController {
     		@RequestHeader(value="accessToken") String accessToken,
     		@PathVariable Long id) {
         
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 	
     	
     	return HttpResponseUtility.getHttpSuccess(service.getById(id));
@@ -98,13 +72,6 @@ public class MovieShareTypeOfferController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		@PathVariable Long id) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 
         service.delete(id);
         return HttpResponseUtility.getHttpSuccess("deleted successfully");

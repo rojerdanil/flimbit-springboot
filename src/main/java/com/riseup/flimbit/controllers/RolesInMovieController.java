@@ -21,12 +21,7 @@ public class RolesInMovieController {
     @Autowired
     private RolesInMovieService service;
     
-    @Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
-	
-
+   
     @PostMapping("/addRoleInMovie")
     public RolesInMovie create(@RequestBody RolesInMovie role) {
     	
@@ -48,14 +43,7 @@ public class RolesInMovieController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken) {
     	
-   	 	if(isValidateTokenEnable)
- 		{	
- 		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-            if (commonToken.getStatus() != Messages.SUCCESS) {
- 	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
- 	        }
- 		}
-         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder()
+        return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder()
          		.status(Messages.STATUS_SUCCESS)
          		.message("Data reads")
          		.result(service.findAll()).build());

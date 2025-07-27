@@ -18,45 +18,30 @@ import java.util.List;
 @RequestMapping("/movie-person-role")
 public class MoviePersonRoleController {
 
-    @Autowired
-    private MoviePersonRoleService service;
-    
-    @Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
-	
+	@Autowired
+	private MoviePersonRoleService service;
 
-    @PostMapping
-    public MoviePersonType create(@RequestBody MoviePersonType role) {
-        return service.create(role);
-    }
+	@PostMapping
+	public MoviePersonType create(@RequestBody MoviePersonType role) {
+		return service.create(role);
+	}
 
-    @PutMapping("/{id}")
-    public MoviePersonType update(@PathVariable Integer id, @RequestBody MoviePersonType role) {
-        return service.update(id, role);
-    }
+	@PutMapping("/{id}")
+	public MoviePersonType update(@PathVariable Integer id, @RequestBody MoviePersonType role) {
+		return service.update(id, role);
+	}
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id) {
-        service.delete(id);
-    }
+	@DeleteMapping("/{id}")
+	public void delete(@PathVariable Integer id) {
+		service.delete(id);
+	}
 
-    @GetMapping("/allRole")
-    public ResponseEntity<?>  findAll(@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken) {
-    	
-   	 	if(isValidateTokenEnable)
- 		{	
- 		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-            if (commonToken.getStatus() != Messages.SUCCESS) {
- 	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
- 	        }
- 		}
-         return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder()
-         		.status(Messages.STATUS_SUCCESS)
-         		.message(Messages.STATUS_SUCCESS)
-         		.result(service.findAll()).build());
-    }
+	@GetMapping("/allRole")
+	public ResponseEntity<?> findAll(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken) {
+
+		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder().status(Messages.STATUS_SUCCESS)
+				.message(Messages.STATUS_SUCCESS).result(service.findAll()).build());
+	}
 }

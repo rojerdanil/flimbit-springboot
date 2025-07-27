@@ -23,11 +23,6 @@ public class PortFolioController {
     = LoggerFactory.getLogger(PortFolioController.class);
 	
 	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
-	
-	@Autowired
 	PortfolioService portfolioService;
 	
 	@GetMapping("/portfolioSummery")
@@ -35,13 +30,6 @@ public class PortFolioController {
 	@RequestHeader(value="phoneNumber") String phoneNumber,
 	@RequestHeader(value="accessToken") String accessToken)
 	{
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
         return ResponseEntity.status(HttpStatus.OK).body(portfolioService.getPortFolioByUserPhone(phoneNumber));
 
 	}

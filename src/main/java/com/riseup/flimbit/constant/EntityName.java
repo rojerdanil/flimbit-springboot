@@ -11,5 +11,6 @@ public enum EntityName {
     ANNOUNCEMENT,
     SYSTEM_SETTING,
     AUDIT_LOG,
-    ACTOR
+    ACTOR,
+    ADMIN_USER
 }

@@ -34,167 +34,91 @@ import com.riseup.flimbit.utility.JwtService;
 @RestController
 @RequestMapping(value = "/movieInvest")
 public class MovieInvestController {
-	Logger logger
-    = LoggerFactory.getLogger(MovieController.class);
-	
+	Logger logger = LoggerFactory.getLogger(MovieController.class);
+
 	@Autowired
 	MovieInvestService movieInvestService;
-	
+
 	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
-	
+	boolean isValidateTokenEnable;
+
 	@Autowired
 	JwtService jwtService;
-	
+
 	@PostMapping("/buyShare")
-    public ResponseEntity<?> updateMovie(@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@RequestBody MovieInvestRequest movieInvestdReq)
-    {
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-        return ResponseEntity.status(HttpStatus.OK).body(movieInvestService.getBuyShares(movieInvestdReq, phoneNumber));
-    }
-	
+	public ResponseEntity<?> updateMovie(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestBody MovieInvestRequest movieInvestdReq) {
+		return ResponseEntity.status(HttpStatus.OK).body(movieInvestService.getBuyShares(movieInvestdReq, phoneNumber));
+	}
+
 	@GetMapping("/dataTableUserInvestment")
-	public ResponseEntity<?> getPaginatedRewards(
-			@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-	        @RequestParam int draw,
-	        @RequestParam int start,
-	        @RequestParam int length,
-	        @RequestParam(required = false) String searchText,
-	        @RequestParam(defaultValue = "id") String sortColumn,
-	        @RequestParam(defaultValue = "asc") String sortOrder,
-	        @RequestParam(required = false) String language,
-	        @RequestParam(required = false) String movie,
-	        @RequestParam(required = false) String status   
-	) {
-		
-		
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-		
-    	int languagex = language == null || language.isEmpty() ? 0 : Integer.parseInt(language);
-    	int moviex = movie == null || movie.isEmpty() ? 0 : Integer.parseInt(movie);
-    	status = status == null || status.isEmpty() ? null : status;
-    	searchText = searchText == null || searchText.isEmpty() ? null : searchText;
-       
-    	
+	public ResponseEntity<?> getPaginatedRewards(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestParam int draw, @RequestParam int start,
+			@RequestParam int length, @RequestParam(required = false) String searchText,
+			@RequestParam(defaultValue = "id") String sortColumn, @RequestParam(defaultValue = "asc") String sortOrder,
+			@RequestParam(required = false) String language, @RequestParam(required = false) String movie,
+			@RequestParam(required = false) String status) {
 
-	    Page<UserInvestmentSectionDTO> page = movieInvestService.getMovieInvestForUserInvestSection( languagex,moviex,status,searchText,start, length,  sortColumn, sortOrder);
-	    Map<String, Object> response = new HashMap<>();
-        response.put("draw", draw);
-        response.put("recordsTotal", page.getTotalElements());
-        response.put("recordsFiltered", page.getTotalElements());
-        response.put("data", page.getContent());
-        return HttpResponseUtility.getHttpSuccess(response);
+		int languagex = language == null || language.isEmpty() ? 0 : Integer.parseInt(language);
+		int moviex = movie == null || movie.isEmpty() ? 0 : Integer.parseInt(movie);
+		status = status == null || status.isEmpty() ? null : status;
+		searchText = searchText == null || searchText.isEmpty() ? null : searchText;
+
+		Page<UserInvestmentSectionDTO> page = movieInvestService.getMovieInvestForUserInvestSection(languagex, moviex,
+				status, searchText, start, length, sortColumn, sortOrder);
+		Map<String, Object> response = new HashMap<>();
+		response.put("draw", draw);
+		response.put("recordsTotal", page.getTotalElements());
+		response.put("recordsFiltered", page.getTotalElements());
+		response.put("data", page.getContent());
+		return HttpResponseUtility.getHttpSuccess(response);
 	}
+
 	@GetMapping("/readInvestbymovie/{id}/{userId}")
-	public ResponseEntity<?> getInvestsharebymovId(
-			@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@PathVariable("id") int id	,
-    		@PathVariable("userId") int userId)
-	        
-    		{
-		
-		
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-			
-	            return HttpResponseUtility.getHttpSuccess(movieInvestService.readInvestmentWithShareTypeByMovId(id,userId));
-	}
-	
-	
-	
-	@GetMapping("/readInvestbymoviebyshareId/{id}/{userId}/{shareId}")
-	public ResponseEntity<?> getInvestsharebyShareId(
-			@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@PathVariable("id") int id	,
-    		@PathVariable("userId") int userId,
-    		@PathVariable("shareId") int shareId
-    		
-			)
-	        
-    		{
-		
-		
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-			
-	            return HttpResponseUtility.getHttpSuccess(movieInvestService.getInvestmentsForMovIdAndUserIdAndShareTypeId(id,userId,shareId));
+	public ResponseEntity<?> getInvestsharebymovId(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @PathVariable("id") int id,
+			@PathVariable("userId") int userId)
+
+	{
+
+		return HttpResponseUtility.getHttpSuccess(movieInvestService.readInvestmentWithShareTypeByMovId(id, userId));
 	}
 
-	
+	@GetMapping("/readInvestbymoviebyshareId/{id}/{userId}/{shareId}")
+	public ResponseEntity<?> getInvestsharebyShareId(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @PathVariable("id") int id,
+			@PathVariable("userId") int userId, @PathVariable("shareId") int shareId
+
+	)
+
+	{
+
+		return HttpResponseUtility
+				.getHttpSuccess(movieInvestService.getInvestmentsForMovIdAndUserIdAndShareTypeId(id, userId, shareId));
+	}
 
 	@PostMapping("/udpateStatus")
-	public ResponseEntity<?> getPaginatedRewards(
-			@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@RequestBody StatusRequest statusRequest)
-	        
-    		{
-		
-		
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-			
-	            return HttpResponseUtility.getHttpSuccess(movieInvestService.updateInvestmentStatus(statusRequest));
+	public ResponseEntity<?> getPaginatedRewards(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestBody StatusRequest statusRequest)
+
+	{
+
+		return HttpResponseUtility.getHttpSuccess(movieInvestService.updateInvestmentStatus(statusRequest));
 	}
 
-	
-	
 	@PostMapping("/repayAllInvestedforShare")
-	public ResponseEntity<?> getRepayAllInvestedforShare(
-			@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@RequestBody PayAllShareReturnRequest statusRequest)
-	        
-    		{
-		
-		
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-			
-	            return HttpResponseUtility.getHttpSuccess(movieInvestService.repayShareInvestMoneyToUser(statusRequest));
+	public ResponseEntity<?> getRepayAllInvestedforShare(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken,
+			@RequestBody PayAllShareReturnRequest statusRequest)
+
+	{
+
+		return HttpResponseUtility.getHttpSuccess(movieInvestService.repayShareInvestMoneyToUser(statusRequest));
 	}
 }
-

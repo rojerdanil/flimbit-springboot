@@ -31,11 +31,7 @@ public class PromotionTypeController {
     @Autowired
     PromotionTypeRepository promotionTypeRepository;
 
-    @Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
-    
+     
     
     @GetMapping("/page")
     public ResponseEntity<?> getPaginatedPromotionTypes(
@@ -51,16 +47,7 @@ public class PromotionTypeController {
     ) {
     	
     	
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-    	
-    	
-        Page<PromotionType> page = promotionTypeService.getPaginated(
+         Page<PromotionType> page = promotionTypeService.getPaginated(
                 start, length, searchText, sortColumn, sortOrder
         );
 
@@ -79,15 +66,7 @@ public class PromotionTypeController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		@RequestBody PromotionTypeRequest promotionTypeReq) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-    	
-    	
+     	
         return  ResponseEntity.status(HttpStatus.OK).body(
             	CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SUCCESS).result(	
             			promotionTypeService.save(promotionTypeReq)).build());
@@ -115,27 +94,13 @@ public class PromotionTypeController {
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
     		@PathVariable Long id) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-        return HttpResponseUtility.getHttpSuccess(promotionTypeService.deleteById(id));
+         return HttpResponseUtility.getHttpSuccess(promotionTypeService.deleteById(id));
 
     }
     @GetMapping("/findAll")
     public ResponseEntity<?> getAllRecords(@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
         return HttpResponseUtility.getHttpSuccess(promotionTypeService.findAllRecords());
 
     }

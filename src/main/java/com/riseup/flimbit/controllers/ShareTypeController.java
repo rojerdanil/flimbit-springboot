@@ -32,10 +32,6 @@ public class ShareTypeController {
 	Logger logger
     = LoggerFactory.getLogger(ShareTypeController.class);
 	
-	@Autowired
-	JwtService jwtService;
-	@Value("${isValidateTokenEnable}")
-    boolean isValidateTokenEnable;
 
 	@Autowired
 	 ShareTypeService service;
@@ -47,14 +43,6 @@ public class ShareTypeController {
     		@RequestHeader(value="accessToken") String accessToken,
     		@PathVariable String type,
 			@RequestBody ShareTypeRequest shareType) {
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-		
 		return ResponseEntity.ok(service.create(shareType,type));
 	}
 
@@ -67,13 +55,6 @@ public class ShareTypeController {
 		
 		
 
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 		service.delete(id);
 		
 		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder()
@@ -92,13 +73,6 @@ public class ShareTypeController {
     		@PathVariable Long movieId) {
 		
 		
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
 		
 		
 		return ResponseEntity.status(HttpStatus.OK).body(CommonResponse.builder()

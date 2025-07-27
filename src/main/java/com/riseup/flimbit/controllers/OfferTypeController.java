@@ -26,130 +26,67 @@ import java.util.Map;
 @RequestMapping("/offertypes")
 public class OfferTypeController {
 
-    @Autowired
-    private OfferTypeService service;
+	@Autowired
+	private OfferTypeService service;
 
-    @Autowired
-  	JwtService jwtService;
-  	@Value("${isValidateTokenEnable}")
-      boolean isValidateTokenEnable;
-    
-    @PostMapping("/paged")
-    public ResponseEntity<?> getPaginatedOfferTypes(
-    		@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		
-    		@RequestParam int draw,
-            @RequestParam int start,
-            @RequestParam int length,
-            @RequestParam(required = false) String searchText,
-            @RequestParam(defaultValue = "id") String sortColumn,
-            @RequestParam(defaultValue = "asc") String sortOrder
-    		) {
-    	
-    	
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-    	
-        Page<OfferType> offerPage = service.getPagedOfferTypes(start, length, searchText, sortColumn, sortOrder);
+	@PostMapping("/paged")
+	public ResponseEntity<?> getPaginatedOfferTypes(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken,
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("draw", draw);
-        result.put("recordsTotal", offerPage.getTotalElements());
-        result.put("recordsFiltered", offerPage.getTotalElements());
-        result.put("data", offerPage.getContent());
+			@RequestParam int draw, @RequestParam int start, @RequestParam int length,
+			@RequestParam(required = false) String searchText, @RequestParam(defaultValue = "id") String sortColumn,
+			@RequestParam(defaultValue = "asc") String sortOrder) {
 
-        return HttpResponseUtility.getHttpSuccess(result);
-    }
-    
-    @PostMapping(value = "/insert")
-    public ResponseEntity<?> create(
-    		@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@RequestBody OfferTypeRequest offerType) {
-    	
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-    	
-        return HttpResponseUtility.getHttpSuccess(service.createOfferType(offerType));
-    }
+		Page<OfferType> offerPage = service.getPagedOfferTypes(start, length, searchText, sortColumn, sortOrder);
 
-    @GetMapping
-    public List<OfferType> getAll() {
-        return service.getAllOfferTypes();
-    }
+		Map<String, Object> result = new HashMap<>();
+		result.put("draw", draw);
+		result.put("recordsTotal", offerPage.getTotalElements());
+		result.put("recordsFiltered", offerPage.getTotalElements());
+		result.put("data", offerPage.getContent());
 
-    @GetMapping("/type/{id}")
-    public ResponseEntity<?> getById(@PathVariable Integer id,
-    		@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken) {
-    	if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-    	
-    	OfferType offerType =  service.getOfferTypeById(id)
-        		.orElseThrow(() -> new RuntimeException("PromoType is not found for id :" +id));
-         
-         return HttpResponseUtility.getHttpSuccess(offerType);
-        
-    }
+		return HttpResponseUtility.getHttpSuccess(result);
+	}
 
-    @PostMapping("/update/{id}")
-    public ResponseEntity<?>  update(@PathVariable Integer id, 
-    		@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@RequestBody OfferTypeRequest offerType) {
-    	
-    
-    		if(isValidateTokenEnable)
-    		{	
-    		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-               if (commonToken.getStatus() != Messages.SUCCESS) {
-    	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-    	        }
-    		}
-        	
-    	
-    	
-        return HttpResponseUtility.getHttpSuccess(service.updateOfferType(id, offerType));
-    }
+	@PostMapping(value = "/insert")
+	public ResponseEntity<?> create(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestBody OfferTypeRequest offerType) {
 
-    @GetMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@PathVariable Integer id) {
+		return HttpResponseUtility.getHttpSuccess(service.createOfferType(offerType));
+	}
 
-		if(isValidateTokenEnable)
-		{	
-		 CommonResponse commonToken = jwtService.validateToken(accessToken, deviceId, phoneNumber);
-           if (commonToken.getStatus() != Messages.SUCCESS) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-	        }
-		}
-    	
-    	
-    	
-        return HttpResponseUtility.getHttpSuccess(service.deleteOfferType(id));
-    }
-    
+	@GetMapping
+	public List<OfferType> getAll() {
+		return service.getAllOfferTypes();
+	}
+
+	@GetMapping("/type/{id}")
+	public ResponseEntity<?> getById(@PathVariable Integer id, @RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken) {
+		OfferType offerType = service.getOfferTypeById(id)
+				.orElseThrow(() -> new RuntimeException("PromoType is not found for id :" + id));
+
+		return HttpResponseUtility.getHttpSuccess(offerType);
+
+	}
+
+	@PostMapping("/update/{id}")
+	public ResponseEntity<?> update(@PathVariable Integer id, @RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @RequestBody OfferTypeRequest offerType) {
+
+		return HttpResponseUtility.getHttpSuccess(service.updateOfferType(id, offerType));
+	}
+
+	@GetMapping("/delete/{id}")
+	public ResponseEntity<?> delete(@RequestHeader(value = "deviceId") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber,
+			@RequestHeader(value = "accessToken") String accessToken, @PathVariable Integer id) {
+
+		return HttpResponseUtility.getHttpSuccess(service.deleteOfferType(id));
+	}
 
 }
