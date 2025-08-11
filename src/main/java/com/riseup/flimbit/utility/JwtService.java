@@ -8,6 +8,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,34 +32,79 @@ public class JwtService {
 	@Value("${jwt.secret.key}")
 	String SECRET;
 
-	@Value("${jwt.expiry.time}")
-	long expiryTime;
+
 	
-	@Value("${jwt.expiry.refresh}")
-	long refreshExpiryTime;
+	@Autowired
+	TokenExpiryService tokenExpiryService;
 
-
-	public String generateToken(String userDeviceId,boolean isRefreshToken) { // Use email as username
+	public String createWebToken(String userDeviceId,boolean isRefreshToken) { // Use email as username
 		Map<String, Object> claims = new HashMap<>();
-		return createToken(claims, userDeviceId,isRefreshToken);
+		return createWebTokenAdmin(claims, userDeviceId,isRefreshToken);
+	}
+	
+	
+
+	public String createMobileToken( String key, boolean isRefreshToken) {
+	   
+		// key is phoneNumber:deviceId
+		Map<String, Object> claims = new HashMap<>();
+
+		long timeNew;
+		try {
+			timeNew = isRefreshToken 
+			    ? tokenExpiryService.getMobileTokenExpiryTime() 
+			    : tokenExpiryService.getMobileRefreshTokenExpiryTimeInSeconds();
+			
+			//tokenExpiryService.getMobileTokenExpiryTime();
+            //tokenExpiryService.getMobileRefreshTokenExpiryTimeInSeconds();
+			String claimType = isRefreshToken ? "refresh" : "access";
+		    claims.put("type", claimType);
+
+		    return Jwts.builder()
+		        .setClaims(claims)
+		        .setSubject(key)
+		        .setIssuedAt(new Date())
+		        .setExpiration(new Date(System.currentTimeMillis() + timeNew * 1000)) // ✅ FIXED
+		        .signWith(getSignKey(), SignatureAlgorithm.HS256)
+		        .compact();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // assume both return in seconds
+
+
+	    return null;
 	}
 
-	private String createToken(Map<String, Object> claims, String email, boolean isRefreshToken) {
-	    long timeNew = isRefreshToken 
-	        ? TokenExpiryService.getRefreshTokenExpiryTimeInSeconds() 
-	        : TokenExpiryService.getTokenExpiryTime(); // assume both return in seconds
+	
+	
+
+	private String createWebTokenAdmin(Map<String, Object> claims, String email, boolean isRefreshToken) {
+	    long timeNew;
+		try {
+			timeNew = isRefreshToken 
+			    ? tokenExpiryService.getRefreshTokenExpiryTimeInSeconds() 
+			    : tokenExpiryService.getTokenExpiryTime();
+			
+			//tokenExpiryService.getMobileTokenExpiryTime();
+            //tokenExpiryService.getMobileRefreshTokenExpiryTimeInSeconds();
+			String claimType = isRefreshToken ? "refresh" : "access";
+		    claims.put("type", claimType);
+
+		    return Jwts.builder()
+		        .setClaims(claims)
+		        .setSubject(email)
+		        .setIssuedAt(new Date())
+		        .setExpiration(new Date(System.currentTimeMillis() + timeNew * 1000)) // ✅ FIXED
+		        .signWith(getSignKey(), SignatureAlgorithm.HS256)
+		        .compact();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // assume both return in seconds
 
 
-	    String claimType = isRefreshToken ? "refresh" : "access";
-	    claims.put("type", claimType);
-
-	    return Jwts.builder()
-	        .setClaims(claims)
-	        .setSubject(email)
-	        .setIssuedAt(new Date())
-	        .setExpiration(new Date(System.currentTimeMillis() + timeNew * 1000)) // ✅ FIXED
-	        .signWith(getSignKey(), SignatureAlgorithm.HS256)
-	        .compact();
+	    return null;
 	}
 
 	private Key getSignKey() {
@@ -88,6 +134,8 @@ public class JwtService {
 	}
 
 	public CommonResponse validateToken(String token, String deviceId, String userName) {
+		// key is userName:deviceId
+
 		CommonResponse common = CommonResponse.builder().build();
 		try {
 			final String username = extractUsername(token);
@@ -125,6 +173,39 @@ public class JwtService {
 	}	
 		
 	
-	
+	public boolean validateMobileToken(String token, String deviceId, String phoneNumber) { 
+		
+		// key is phoneNumber:deviceId
+
+	    try {
+	        final String username = extractUsername(token);
+	        System.out.println("username: " + username + " : log: " + phoneNumber + " : " + deviceId);
+
+	        String tokenKey = phoneNumber + ":" + deviceId;
+	        boolean isValid = (username.equals(tokenKey) && !isTokenExpired(token));
+	        System.out.println("is valid: " + isValid);
+
+	        if (!isValid) {
+	            if (!username.equals(phoneNumber + ":" + deviceId)) {
+	                // Log error message for deviceId and username mismatch
+	                System.out.println("Error: " + Messages.JWT_TOKEN_DEVICEID_USERNAME_WRONG);
+	            } else {
+	                // Log error message for token expiration
+	                System.out.println("Error: " + Messages.JWT_TOKEN_EXPIRED);
+	            }
+	        }
+
+	        return isValid;
+	    } catch (ExpiredJwtException ex) {
+	        // Log error message for expired token
+	        System.out.println("Error: Token expired");
+	        return false;
+	    } catch (SignatureException ex) {
+	        // Log error message for invalid token signature
+	        System.out.println("Error: Invalid token signature");
+	        return false;
+	    }
+	}
+
 
 }

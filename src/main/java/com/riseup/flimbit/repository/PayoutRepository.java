@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.riseup.flimbit.entity.Payout;
 import com.riseup.flimbit.entity.dto.PayoutDTO;
 import com.riseup.flimbit.entity.dto.UserInvestmentSectionDTO;
+import com.riseup.flimbit.entity.dto.UserPayoutInitateStatusSummaryDTO;
 
 @Repository
 public interface PayoutRepository extends JpaRepository<Payout, Integer> {
@@ -133,7 +134,28 @@ GROUP BY
 	                             (int userId,int movieId,int shareTypeId,int investId);
 	    
 
-	   
+	    @Query(value = """
+	    	    SELECT
+	    	      COUNT(DISTINCT CASE WHEN failed_count = 0 THEN user_id END) AS fully_successful,
+	    	      COUNT(DISTINCT CASE WHEN failed_count > 0 AND success_count > 0 THEN user_id END) AS partial_failure,
+	    	      COUNT(DISTINCT CASE WHEN success_count = 0 AND failed_count > 0 THEN user_id END) AS fully_failed
+	    	    FROM (
+	    	      SELECT
+	    	        user_id,
+	    	        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS success_count,
+	    	        SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed_count
+	    	      FROM payout
+	    	      WHERE movie_id = :movieId
+	    	      GROUP BY user_id
+	    	    ) AS user_status_summary
+	    	    """, nativeQuery = true)
+	    	UserPayoutInitateStatusSummaryDTO countUserPayoutCompletedStatusSummary(@Param("movieId") int movieId);
+	    
+	    
+	    @Query(value = "SELECT COUNT(u) FROM payout u " +
+			       "WHERE u.movie_id = :movieId ", nativeQuery = true )
+			int  countUserPayoutBymovId(@Param("movieId") int movieId);
+
 
 
 }

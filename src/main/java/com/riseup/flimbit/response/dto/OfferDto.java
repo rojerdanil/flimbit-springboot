@@ -19,4 +19,10 @@ public class OfferDto {
     private String offerStatus;
     private String offerTypeName;
     private long movShareOfferId;
+    
+    boolean IsBuyAndGet;
+    int buyQuantity;
+    int freeQuantity;
+    String targetAudience;
+    int maxUsers;
 }

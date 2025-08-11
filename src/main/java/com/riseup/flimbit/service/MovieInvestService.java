@@ -7,11 +7,17 @@ import org.springframework.data.domain.Page;
 import com.riseup.flimbit.entity.MovieInvestment;
 import com.riseup.flimbit.entity.dto.UserInvestmentSectionDTO;
 import com.riseup.flimbit.entity.dto.UserInvestmentSharTypeDTO;
+import com.riseup.flimbit.request.MovieIinvestSuccess;
 import com.riseup.flimbit.request.MovieInvestRequest;
+import com.riseup.flimbit.request.MovieOfferCalculatorRequest;
 import com.riseup.flimbit.request.PayAllShareReturnRequest;
+import com.riseup.flimbit.request.PaymentUpdateRequest;
+import com.riseup.flimbit.request.SharePaymentRequest;
 import com.riseup.flimbit.request.StatusRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.SuccessResponse;
+import com.riseup.flimbit.response.SharePaymentResponse;
+import com.riseup.flimbit.response.dto.OfferMoneyResponse;
 
 public interface MovieInvestService {
 	
@@ -26,5 +32,14 @@ public interface MovieInvestService {
 	List<UserInvestmentSharTypeDTO>	getInvestmentsForMovIdAndUserIdAndShareTypeId(int id,int userId,int shareId);
 	
 	SuccessResponse    repayShareInvestMoneyToUser(PayAllShareReturnRequest request);
+	
+	OfferMoneyResponse    getCalculateOfferMoney(MovieOfferCalculatorRequest movieInvRequest);
+	
+	SharePaymentResponse   validatePaymentForShares( SharePaymentRequest sharePaymentRequest);
+	
+    void  updatePaymentStatus(PaymentUpdateRequest request);
 
+    void  updatePaymentStatusTesting(PaymentUpdateRequest request);
+
+    
 }

@@ -38,6 +38,13 @@ public interface MovieOfferFlatDto {
     String getMovType();
     long getMovShareOfferId();
     
+    boolean getIsBuyAndGet();
+    int getBuyQuantity();
+    int getfreeQuantity();
+    String getTargetAudience();
+    
+    Integer getMaxUsers();
+    
 }
 
 

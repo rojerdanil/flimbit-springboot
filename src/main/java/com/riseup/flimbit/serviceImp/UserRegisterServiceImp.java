@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
+import javax.management.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.riseup.flimbit.constant.ActionType;
+import com.riseup.flimbit.constant.ConfigCacheService;
 import com.riseup.flimbit.constant.EntityName;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.constant.PromotionTypeEnum;
@@ -33,12 +39,22 @@ import com.riseup.flimbit.entity.User;
 import com.riseup.flimbit.entity.UserPromoCode;
 import com.riseup.flimbit.entity.UserStatus;
 import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
+import com.riseup.flimbit.gateway.email.EmailService;
+import com.riseup.flimbit.gateway.pan.PanService;
+import com.riseup.flimbit.gateway.pan.PanVerificationResponse;
+import com.riseup.flimbit.gateway.pan.SurePassAuthService;
+import com.riseup.flimbit.gateway_sms.OtpResponse;
+import com.riseup.flimbit.gateway_sms.OtpService;
+import com.riseup.flimbit.gateway_sms.TwoFactorResponse;
 import com.riseup.flimbit.repository.PromoCodeRepository;
 import com.riseup.flimbit.repository.PromotionTypeRepository;
 import com.riseup.flimbit.repository.ReferralTrackingRepository;
 import com.riseup.flimbit.repository.UserPromoCodeRepository;
 import com.riseup.flimbit.repository.UserRepository;
 import com.riseup.flimbit.repository.UserStatusRespository;
+import com.riseup.flimbit.request.EmailRequest;
+import com.riseup.flimbit.request.LoginRequest;
+import com.riseup.flimbit.request.PanRequest;
 import com.riseup.flimbit.request.PhoneRegValidateRequest;
 import com.riseup.flimbit.request.PhoneRegisterRequest;
 import com.riseup.flimbit.request.RefreshTokenRequest;
@@ -46,7 +62,9 @@ import com.riseup.flimbit.request.StatusRequest;
 import com.riseup.flimbit.request.UserRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.PhoneOtpResponse;
+import com.riseup.flimbit.response.SuccessResponse;
 import com.riseup.flimbit.response.TokenResponse;
+import com.riseup.flimbit.security.UserContext;
 import com.riseup.flimbit.security.UserContextHolder;
 import com.riseup.flimbit.service.UserRegisterService;
 import com.riseup.flimbit.service.UserWalletBalanceService;
@@ -54,6 +72,7 @@ import com.riseup.flimbit.utility.CodeGenerator;
 import com.riseup.flimbit.utility.CommonUtilty;
 import com.riseup.flimbit.utility.HttpResponseUtility;
 import com.riseup.flimbit.utility.JwtService;
+import com.riseup.flimbit.utility.TokenEncryptor;
 
 import jakarta.transaction.Transactional;
 
@@ -90,26 +109,50 @@ public class UserRegisterServiceImp implements UserRegisterService {
 	@Autowired
 	AuditLogServiceImp audit;
 	
+	@Autowired
+	TokenEncryptor tokenEncryptor;
+	
+	
+	@Autowired
+	OtpService  smsService;
+	
+	@Autowired
+	EmailService emailService;
+	
+	@Autowired
+	PanService  panService;
+	
+	 @Autowired
+	    SurePassAuthService  surePassAuthService;
+	
+	 @Autowired
+	 ConfigCacheService  configCacheService;
+	 
 	@Override
 	public CommonResponse generateRegPhoneOtp(PhoneRegisterRequest phoneRegRequest) {
 		// TODO Auto-generated method stub
+		
 		Optional<User> existUser = userRepository.findByphoneNumber(phoneRegRequest.getPhoneNumber());
 		if (existUser.isPresent()) {
 			return CommonResponse.builder().status(Messages.STATUS_FAILURE).message(Messages.USER_FOUND).build();
 		}
-		String otpCode = String.valueOf(new Random().nextInt(900000) + 100000);
-		PhoneOtpResponse phoneOtpResponse = PhoneOtpResponse.builder().code(otpCode).expiryTime(Instant.now()).build();
-		phoneRegOtpCache.put(phoneRegRequest.getPhoneNumber(), phoneOtpResponse);
+		//String otpCode = String.valueOf(new Random().nextInt(900000) + 100000);
+		//PhoneOtpResponse phoneOtpResponse = PhoneOtpResponse.builder().code(otpCode).expiryTime(Instant.now()).build();
+		//phoneRegOtpCache.put(phoneRegRequest.getPhoneNumber(), phoneOtpResponse);
 		// trigger sms service to send otp
-		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(phoneOtpResponse).build();
+		OtpResponse response =	smsService.sendOtp(phoneRegRequest.getPhoneNumber(), "noneed auto generate");
+		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(response).build();
 
 	}
-
+	
+	
+	
+	@Transactional
 	@Override
-	public CommonResponse validateRegPhoneOtp(PhoneRegValidateRequest phRegValiReq, String device_id) {
+	public CommonResponse validateRegPhoneOtp(PhoneRegValidateRequest phRegValiReq, String deviceId) {
 		// TODO Auto-generated method stub
 
-		PhoneOtpResponse phoneOtpRes = phoneRegOtpCache.get(phRegValiReq.getPhoneNumber());
+	/*	PhoneOtpResponse phoneOtpRes = phoneRegOtpCache.get(phRegValiReq.getPhoneNumber());
 		if (phoneOtpRes == null)
 			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.REG_PHONE_NUMBER_NOT_FOUND)
 					.build();
@@ -120,20 +163,45 @@ public class UserRegisterServiceImp implements UserRegisterService {
 			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.REG_OTP_EXPIRY).build();
 
 		}
+		*/
+		
+		try {
+			emailService.sendVerificationEmail("rojer127@gmail.com", "test");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 
-		boolean isValid = phoneOtpRes.getCode().equals(phRegValiReq.getOtp());
-		logger.info(phRegValiReq.getPhoneNumber() + ":" + isValid + ": " + phoneOtpRes.getCode() + " "
+		Optional<User> existUser = userRepository.findByphoneNumber(phRegValiReq.getPhoneNumber());
+		if (existUser.isPresent()) {
+			return CommonResponse.builder().status(Messages.STATUS_FAILURE).message(Messages.USER_FOUND).build();
+		}
+		OtpResponse response =	smsService.verifyOtp(phRegValiReq.getSessionId(), phRegValiReq.getOtp());
+		//boolean isValid = phoneOtpRes.getCode().equals(phRegValiReq.getOtp());
+		
+		boolean isValid = response.getStatus().equalsIgnoreCase("success") ? true : false;
+		logger.info(phRegValiReq.getPhoneNumber() + ":" + isValid + ": " +isValid+ " "
 				+ phRegValiReq.getOtp());
 
 		if (isValid) {
 
-			phoneRegOtpCache.remove(phRegValiReq.getPhoneNumber());
-			String token = jwtService.generateToken(phRegValiReq.getPhoneNumber() + ":" + device_id, false);
-			String refreshToken = jwtService.generateToken(phRegValiReq.getPhoneNumber() + ":" + device_id, true);
+			
+			
+			String tokenKey = phRegValiReq.getPhoneNumber() + ":" + deviceId;
+	    	String token = jwtService.createMobileToken(tokenKey, false);
+			String refreshToken = jwtService.createMobileToken(tokenKey, true);
+			String tokenEnc = tokenEncryptor.encrypt(token);
+			String refreshTokenEnc = tokenEncryptor.encrypt(refreshToken);
+
+			
 			User user = new User();
 			user.setPhoneNumber(phRegValiReq.getPhoneNumber());
 			user.setStatus(Messages.USER_ACTIVE);
-			user.setAccessKey(token);
+			user.setAccessKey(tokenEnc);
+			user.setRefreshToken(refreshTokenEnc);
+			user.setDeviceId(deviceId);
+			
 			int id = userRepository.save(user).getId();
 			logger.info("id " + id);
 			UserStatus userStatus = new UserStatus();
@@ -351,12 +419,14 @@ public class UserRegisterServiceImp implements UserRegisterService {
 	public CommonResponse genRefreshToken(String deviceId, String phoneNumber, RefreshTokenRequest refreshRequest) {
 		// TODO Auto-generated method stub
 		String refreshToken = refreshRequest.getRefreshToken();
-		CommonResponse commonToken = jwtService.validateToken(refreshRequest.getRefreshToken(), deviceId, phoneNumber);
+		boolean isValid = jwtService.validateMobileToken(refreshRequest.getRefreshToken(), deviceId, phoneNumber);
 
-		if (commonToken.getStatus() != Messages.SUCCESS) {
-			return commonToken;
+		if (!isValid)
+		{
+		   throw new RuntimeException("Token invalid");
 		}
-		String token = jwtService.generateToken(phoneNumber + ":" + deviceId, false);
+		String token = jwtService.createMobileToken(phoneNumber + ":" + deviceId, false);
+		
 		Optional<User> userOpt = userRepository.findByphoneNumber(phoneNumber);
 		if (userOpt.isPresent()) {
 			User user = userOpt.get();
@@ -432,6 +502,241 @@ public class UserRegisterServiceImp implements UserRegisterService {
               }
 
 		return response;
+	}
+
+	@Override
+	public TokenResponse createMobileToken(String deviceId,String phoneNumber,LoginRequest loginRequest) 	
+	{
+		// TODO Auto-generated method stub
+		logger.info("***** create token starts  for " + phoneNumber);
+		User user = userRepository.findByphoneNumber(phoneNumber)
+		.orElseThrow(() -> new RuntimeException("user is not found  for " + phoneNumber));
+		
+		if(!user.getPassword().trim().equalsIgnoreCase(loginRequest.getPassword().trim())  &&
+				!user.getDeviceId().trim().equalsIgnoreCase(loginRequest.getDeviceId().trim())
+				)
+		{
+			
+			logger.info("Password and device Id is not matching in db");
+			throw new RuntimeException("Password and device Id is not matching");
+		}
+		
+		String tokenKey = user.getPhoneNumber() + ":" + user.getDeviceId();
+    	String token = jwtService.createMobileToken(tokenKey, false);
+		String refreshToken = jwtService.createMobileToken(tokenKey, true);
+		String tokenEnc = tokenEncryptor.encrypt(token);
+		String refreshTokenEnc = tokenEncryptor.encrypt(refreshToken);
+        user.setAccessKey(tokenEnc);
+        user.setRefreshToken(refreshTokenEnc);
+        user.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+        userRepository.save(user);		
+		TokenResponse tokenRes = TokenResponse.builder().accessToken(tokenEnc).refreshToken(refreshTokenEnc)
+				.accessTokenExpiry(jwtService.extractExpiration(token).toInstant())
+				.refreshTokenExpiry(jwtService.extractExpiration(refreshToken).toInstant()).build();
+
+		
+		logger.info("***** create token ends  for " + phoneNumber);
+		return tokenRes;
+	}
+
+	@Override
+	public User validateMobileUserToken(String phoneNumber, String deviceId,String token) {
+		// TODO Auto-generated method stub
+		logger.info("***** Validate validateMobileUserToken starts ******* " + phoneNumber);
+		try
+		{
+			if(token == null || token.trim().length()==0)
+                return null;  
+           String decriptedToken = tokenEncryptor.decrypt(token);
+			
+           Optional<User> userOpt = userRepository.findByphoneNumber(phoneNumber);
+           if(!userOpt.isPresent())
+           {
+    		    logger.info("user is not found for Phone Number" + phoneNumber);
+
+           }
+           User user = userOpt.get();
+         String userToken = user.getAccessKey().trim();
+      	 String refreshToken = user.getRefreshToken().trim();
+      	 String providedToken = token.trim();
+           
+      	 if (!userToken.equals(providedToken) && !refreshToken.equals(providedToken)) {
+ 		    logger.info("Token does not match with refresh or access token. Device ID: " + phoneNumber);
+ 		    return null;
+ 		  }      
+      	 if(!user.getDeviceId().trim().equalsIgnoreCase(deviceId.trim()))
+      	 {
+      		 logger.info("Device Id is not matched . Device ID: " + deviceId + " : db :"+user.getDeviceId());
+  		    return null;
+      	 }
+      boolean isValid =	jwtService.validateMobileToken(decriptedToken, user.getDeviceId(), user.getPhoneNumber());
+           
+        if(!isValid)
+        {
+        	logger.info("Token is not valid " + phoneNumber);
+        	return null;
+        }
+			return user;
+		}
+		catch(Exception e)
+		{
+			logger.info(e.getMessage());
+			
+		}
+		
+		return null;
+	}
+
+
+    @Transactional
+	@Override
+	public SuccessResponse sendVerificationEmail(EmailRequest emailRequest) {
+    	
+    //	System.out.println(configCacheService.getConstant("max_invest_amount"));
+		
+	 UserContext loginUser = 	UserContextHolder.getContext();
+	 
+	    String otp =  String.valueOf((int)(Math.random() * 900000) + 100000);
+
+		// TODO Auto-generated method stu
+	 logger.info("user " + loginUser.getDeviceId() + ":" + loginUser.getPhone() + ": otp :" +otp);
+	 
+	 User user = userRepository.findByphoneNumber(loginUser.getPhone()).orElse(null);
+	 
+	 
+				
+	 if(user == null  )
+		 throw new RuntimeException("User is not found " + loginUser.getPhone());
+	 
+	 
+	 
+	 
+	  boolean isEmailAleradyActivate = userRepository.existsByEmail(emailRequest.getEmail());
+	  
+	  if(isEmailAleradyActivate)
+	  {
+		   User emailUser = userRepository.findByEmail(emailRequest.getEmail()).orElse(null);
+		   
+		   if(emailUser != null && emailUser.getPhoneNumber()  != user.getPhoneNumber())
+				    throw new RuntimeException("email is already registerd with another account  " );
+
+	  }
+
+	  
+	  
+             	  
+	 
+	 
+	 user.setVerificationCode(otp);
+	 user.setUpdatedDate(new Timestamp(System.currentTimeMillis()));	
+	 user.setVerificationCodeExpiry(Timestamp.from(Instant.now().plusSeconds(10 * 60)));
+	 
+	 try {
+		emailService.sendVerificationEmail(emailRequest.getEmail() , otp);
+		userRepository.save(user);
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		return  SuccessResponse.builder().status(Messages.STATUS_FAILURE).message("mail send eror").build();
+
+	}
+	 
+		return  SuccessResponse.builder().status(Messages.SUCCESS).message("mail send").build();
+	}
+
+
+
+	@Override
+	public SuccessResponse verifyEmail(String code) {
+		// TODO Auto-generated method stub
+		
+		 UserContext loginUser = 	UserContextHolder.getContext();
+		 
+		    String otp =  String.valueOf((int)(Math.random() * 900000) + 100000);
+
+			// TODO Auto-generated method stu
+		 logger.info("verifyEmail  " + loginUser.getDeviceId() + ":" + loginUser.getPhone() + ": code :" +code);
+		 
+		 User user = userRepository.findByphoneNumber(loginUser.getPhone()).orElse(null);
+					
+		 if(user == null  )
+			 throw new RuntimeException("User is not found " );
+		 
+		 
+		 if (user.getVerificationCode() == null || 
+			        !user.getVerificationCode().equals(code)) {
+			 throw new RuntimeException("Verification code is not equal" );
+			    }
+		 
+		 if (user.getVerificationCodeExpiry() != null &&
+				    user.getVerificationCodeExpiry().before(new Timestamp(System.currentTimeMillis()))) {
+			 throw new RuntimeException("Verification code has expired. Please request a new one. " );
+
+				}
+		 
+		 UserStatus userStatus = userStatusRespository.findByuserId(user.getId())
+			        .orElseGet(() -> new UserStatus());
+		 
+		 if(userStatus.getUserId() != user.getId())
+			 userStatus.setUserId(user.getId());
+		 
+		 userStatus.setEmailVerified(true);
+				                 
+          userStatusRespository.save(userStatus);	 
+		 
+		return SuccessResponse.builder().status(Messages.STATUS_SUCCESS).message("Email verified successfully").build();
+	}
+
+
+   @Transactional
+	@Override
+	public PanVerificationResponse initiatePan(PanRequest panRequest) {
+		// TODO Auto-generated method stub
+		 UserContext loginUser = 	UserContextHolder.getContext();
+		
+		 User user = userRepository.findByphoneNumber(loginUser.getPhone()).orElse(null);
+			
+		 if(user == null  )
+			 throw new RuntimeException("User is not found " );
+		 
+          boolean isPanActive = userRepository.existsByPan(panRequest.getPanNumber());
+		 
+		 if (isPanActive) {
+			 
+			 User existUserPan = userRepository.findByPanId(panRequest.getPanNumber()).orElse(null);
+			 
+			 if(existUserPan != null)
+			 {
+				 if(existUserPan.getPhoneNumber().equals(user.getPhoneNumber()))
+					    throw new RuntimeException("PAN is already verified for this number in verified status");
+
+				 else
+					    throw new RuntimeException("PAN is already available in verified status with other phone number");
+ 
+				 
+			 } 
+			 else 			 
+			    throw new RuntimeException("PAN is already available in verified status with other phone number");
+			}		 
+		 
+     PanVerificationResponse  panVerResponse =	 panService.startVerification(panRequest);
+     
+     if(panVerResponse != null && panVerResponse.isFinalStatus() )
+     {
+    	    logger.info(" Going to update user pan update status");
+    	    user.setPanId(panRequest.getPanNumber());
+    	    UserStatus userStatus = userStatusRespository.findByuserId(user.getId())
+    	            .orElseGet(UserStatus::new);
+    	    userStatus.setUserId(user.getId());
+    	    userStatus.setPanVerified(true);
+    	    userStatusRespository.save(userStatus);    
+    	    
+     }
+     
+	
+	System.out.println(panVerResponse);
+
+		return panVerResponse;
 	}
 
 }

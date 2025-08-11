@@ -28,7 +28,7 @@ public class UserPayoutInitiation {
     private int movieId;
     private int shareTypeId;
 
-    private LocalDate eligibleDate;
+    private Timestamp eligibleDate;
 
     private BigDecimal payoutAmount;
 
@@ -38,4 +38,7 @@ public class UserPayoutInitiation {
     private Timestamp processedOn;
 
     private String remarks;
+    
+    private String paymentStatus;
+    
 } 

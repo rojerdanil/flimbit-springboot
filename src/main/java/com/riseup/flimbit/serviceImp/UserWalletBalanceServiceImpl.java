@@ -7,6 +7,8 @@ import com.riseup.flimbit.entity.UserWalletBalance;
 import com.riseup.flimbit.repository.UserWalletBalanceRepository;
 import com.riseup.flimbit.service.UserWalletBalanceService;
 
+import jakarta.transaction.Transactional;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 

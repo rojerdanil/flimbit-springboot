@@ -43,6 +43,9 @@ public interface AdminUserRepository extends JpaRepository<AdminUser, Integer> {
 	Optional<AdminUser>  findByToken(String token);
 	Optional<AdminUser>  findByRefreshToken(String token);
 	Optional<AdminUser>  findByDeviceId(String deviceId);
+	Optional<AdminUser> findByNameIgnoreCase(String name);
+
+	
 
 
 }

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.riseup.flimbit.entity.AdminUser;
+import com.riseup.flimbit.entity.User;
 import com.riseup.flimbit.service.AdminUserService;
+import com.riseup.flimbit.service.UserRegisterService;
 import com.riseup.flimbit.serviceImp.AdminUserServiceImpl;
 
 import jakarta.servlet.FilterChain;
@@ -20,17 +22,20 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtUserContextFilter extends OncePerRequestFilter {
-	private static final String LOGIN_URL_PREFIX = "/login/"; // Your login endpoint
-
-	Logger logger = LoggerFactory.getLogger(JwtUserContextFilter.class);
+    private static final String LOGIN_URL_PREFIX = "/login/"; // Your login endpoint
+ 	Logger logger = LoggerFactory.getLogger(JwtUserContextFilter.class);
 
 	@Autowired
 	AdminUserService adminUserService;
+	
+	@Autowired
+	UserRegisterService mobileUserService;
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
 		// Skip JWT validation on login URL
-		return request.getRequestURI().startsWith(LOGIN_URL_PREFIX);
+		 return request.getRequestURI().startsWith(LOGIN_URL_PREFIX) ;	
+		 
 	}
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -91,16 +96,22 @@ public class JwtUserContextFilter extends OncePerRequestFilter {
 				if (isPhone) {
 					
 					logger.info("entering into phone");
+			 		String phoneNumber = request.getHeader("phoneNumber");
+
+					User webUser = mobileUserService.validateMobileUserToken(phoneNumber, deviceId, token);
 					
+					if (webUser != null) {
+						context = new UserContext(webUser.getId(), webUser.getPhoneNumber(), webUser.getFirstName(), deviceType,deviceId);
+					}
 					
 				}
-				else
+				else 
 				{
 					logger.info("entering into web");
 
 					AdminUser webUser = adminUserService.validateWebTokenFilter(token, deviceId);
 					if (webUser != null) {
-						context = new UserContext(webUser.getId(), webUser.getPhone(), webUser.getName(), deviceType);
+						context = new UserContext(webUser.getId(), webUser.getPhone(), webUser.getName(), deviceType,deviceId);
 					}
 					
 					

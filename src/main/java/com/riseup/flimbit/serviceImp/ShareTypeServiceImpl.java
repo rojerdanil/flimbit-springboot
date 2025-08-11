@@ -64,7 +64,7 @@ public class ShareTypeServiceImpl implements ShareTypeService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(int id) {
         repository.deleteById(id);
     }
 
@@ -74,7 +74,7 @@ public class ShareTypeServiceImpl implements ShareTypeService {
     }
 
 	@Override
-	public List<ShareTypeResponse> getShareTypeByMovieId(Long movieId) {
+	public List<ShareTypeResponse> getShareTypeByMovieId(int movieId) {
 		// TODO Auto-generated method stub
 		List<ShareTypeResponse> shareResList = new ArrayList<ShareTypeResponse>();
 		

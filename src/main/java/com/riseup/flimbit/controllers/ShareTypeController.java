@@ -51,7 +51,7 @@ public class ShareTypeController {
 			@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
-			@PathVariable Long id) {
+			@PathVariable int id) {
 		
 		
 
@@ -70,7 +70,7 @@ public class ShareTypeController {
 			@RequestHeader(value="deviceId") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
     		@RequestHeader(value="accessToken") String accessToken,
-    		@PathVariable Long movieId) {
+    		@PathVariable int movieId) {
 		
 		
 		

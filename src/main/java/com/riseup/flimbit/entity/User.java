@@ -36,6 +36,9 @@ public class User {
 	Timestamp lastLogin = new Timestamp(System.currentTimeMillis());
 	String status;
 	int language;
-
+	String password;
+	String refreshToken;
+	String verificationCode;
+    Timestamp verificationCodeExpiry  = new Timestamp(System.currentTimeMillis());
 
 }

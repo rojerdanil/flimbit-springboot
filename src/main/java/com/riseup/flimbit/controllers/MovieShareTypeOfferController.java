@@ -10,7 +10,7 @@ import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.entity.OfferShareTypeMovie;
 import com.riseup.flimbit.request.MovieShareOfferRequest;
 import com.riseup.flimbit.response.CommonResponse;
-import com.riseup.flimbit.service.OfferShareTypeMovieService;
+import com.riseup.flimbit.service.MovieShareOfferMapService;
 import com.riseup.flimbit.utility.HttpResponseUtility;
 import com.riseup.flimbit.utility.JwtService;
 
@@ -22,7 +22,7 @@ public class MovieShareTypeOfferController {
 	
 
     @Autowired
-    private OfferShareTypeMovieService service;
+    private MovieShareOfferMapService service;
 
     @PostMapping(value = "/saveMovieShareOffer")
     public ResponseEntity<?> create(

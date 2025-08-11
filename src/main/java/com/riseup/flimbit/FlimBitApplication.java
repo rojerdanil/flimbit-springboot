@@ -10,4 +10,4 @@ public class FlimBitApplication {
 		SpringApplication.run(FlimBitApplication.class, args);
 	}
 
-}
+} 

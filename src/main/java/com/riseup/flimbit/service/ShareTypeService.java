@@ -12,9 +12,9 @@ import com.riseup.flimbit.response.ShareTypeResponse;
 
 public interface ShareTypeService {
     CommonResponse create(ShareTypeRequest shareType,String type);
-    void delete(Long id);
+    void delete(int id);
     List<MovieShareType> findByMovieId(Long movieId);
     
-    List<ShareTypeResponse> getShareTypeByMovieId(Long movieId);
+    List<ShareTypeResponse> getShareTypeByMovieId(int movieId);
 
 }

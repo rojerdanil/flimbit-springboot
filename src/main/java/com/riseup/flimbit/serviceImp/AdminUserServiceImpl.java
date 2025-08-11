@@ -160,9 +160,9 @@ public class AdminUserServiceImpl implements AdminUserService {
 	    	AdminUser user = userOpt.get();
 	    	String tokenKey =user.getName() +":"+ loginRequest.getDeviceId();
 	    	//System.out.println("Token key :" + tokenKey);
-	    	String token = jwtService.generateToken(tokenKey, false);
+	    	String token = jwtService.createWebToken(tokenKey, false);
 	    	//System.out.println("token : " + token);
-			String refreshToken = jwtService.generateToken(tokenKey, true);
+			String refreshToken = jwtService.createWebToken(tokenKey, true);
 			String tokenEnc = tokenEncryptor.encrypt(token);
 			String refreshTokenEnc = tokenEncryptor.encrypt(refreshToken);
 			user.setToken(tokenEnc);
@@ -285,12 +285,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 		 
 		 String decriptedToken = tokenEncryptor.decrypt(token);
-         //System.out.println("token : " + token);
+         //System.out.println("token : "	 + token);
          //System.out.println("decriptedToken : " + decriptedToken);
        
     	 
         // Extract username/email/device from token (depending on how you built it
-         Optional<AdminUser> adminUerOpt = adminUserRepository.findByDeviceId(deviceId);
+         Optional<AdminUser> adminUerOpt = adminUserRepository.findByDeviceId(deviceId	);
 
 		 
 		return adminUerOpt.isPresent() ? adminUerOpt.get() : null;

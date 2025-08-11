@@ -3,6 +3,9 @@ package com.riseup.flimbit.entity;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import org.hibernate.annotations.Formula;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,7 +34,18 @@ public class MovieInvestment {
 	Timestamp updatedDate = new Timestamp(System.currentTimeMillis());
 	BigDecimal returnAmount;
 	int shareTypeId;
+	
+	int totalShareNoPlatformCommission;
+	
+	int totalShareNoProfitCommission;
 
 	
+	@Column(name = "is_processed")
+	private boolean isProcessed ;
+	public BigDecimal getAmountInvested()
+	{
+        return amountInvested != null ? amountInvested : BigDecimal.ZERO;
+
+	}
 
 }

@@ -1,8 +1,4 @@
 package com.riseup.flimbit.entity;
-import lombok.Getter;
-import lombok.Setter;
-
-
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Timestamp;
@@ -13,6 +9,9 @@ import java.math.BigDecimal;
 @Table(name = "payout")
 @Getter
 @Setter
+@NoArgsConstructor       // <-- important for JPA
+@AllArgsConstructor
+@Builder
 public class Payout {
 
     @Id

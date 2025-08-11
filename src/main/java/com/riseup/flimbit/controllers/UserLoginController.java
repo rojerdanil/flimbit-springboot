@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.entity.dto.UserInvestmentSectionDTO;
 import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
+import com.riseup.flimbit.request.EmailRequest;
+import com.riseup.flimbit.request.PanRequest;
 import com.riseup.flimbit.request.PhoneRegValidateRequest;
 import com.riseup.flimbit.request.PhoneRegisterRequest;
 import com.riseup.flimbit.request.RefreshTokenRequest;
@@ -109,6 +112,31 @@ public class UserLoginController {
 		
 	            return HttpResponseUtility.getHttpSuccess(userRegisterService.updateUserStatus(statusRequest));
 	}
-
+	@PostMapping(path= "/mobile/sendVerificationEmail", consumes = "application/json", produces = "application/json")
+	ResponseEntity<?> sendVerfificationMail(@RequestHeader(value="X-Device-ID") String deviceId,@RequestBody EmailRequest emailRequest)
+	{
+		
+		
+		
+	//	return new ResponseEntity<>(userRegisterService.validateRegPhoneOtp(phoneValidateRequest,deviceId),HttpStatus.OK);
+		return HttpResponseUtility.getHttpSuccess(userRegisterService.sendVerificationEmail(emailRequest));		
+	}
+	
+	@GetMapping(path= "/mobile/verifyEmail/{code}",  produces = "application/json")
+	ResponseEntity<?> getVerifyMail(@PathVariable String code)
+	{
+		
+	//	return new ResponseEntity<>(userRegisterService.validateRegPhoneOtp(phoneValidateRequest,deviceId),HttpStatus.OK);
+		return HttpResponseUtility.getHttpSuccess(userRegisterService.verifyEmail(code));		
+	}
+	
+	@PostMapping(path= "/mobile/initiatePan", consumes = "application/json", produces = "application/json")
+	ResponseEntity<?> sendPanInitiate(@RequestBody PanRequest panRequest)
+	{
+		
+	//	return new ResponseEntity<>(userRegisterService.validateRegPhoneOtp(phoneValidateRequest,deviceId),HttpStatus.OK);
+		return HttpResponseUtility.getHttpSuccess(userRegisterService.initiatePan(panRequest));		
+	}
+	
 
 }

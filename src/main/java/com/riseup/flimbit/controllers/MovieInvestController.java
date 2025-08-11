@@ -19,12 +19,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.entity.PromotionReward;
 import com.riseup.flimbit.entity.dto.UserInvestmentSectionDTO;
+import com.riseup.flimbit.gateway_sms.OtpService;
+import com.riseup.flimbit.gateway_sms.TwoFactorResponse;
 import com.riseup.flimbit.request.MovieInvestRequest;
+import com.riseup.flimbit.request.MovieOfferCalculatorRequest;
 import com.riseup.flimbit.request.MovieRequest;
 import com.riseup.flimbit.request.PayAllShareReturnRequest;
+import com.riseup.flimbit.request.PaymentUpdateRequest;
+import com.riseup.flimbit.request.SharePaymentRequest;
 import com.riseup.flimbit.request.StatusRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.service.MovieInvestService;
@@ -44,18 +52,44 @@ public class MovieInvestController {
 
 	@Autowired
 	JwtService jwtService;
+	
+	@Autowired
+	OtpService  smsService;
 
 	@PostMapping("/buyShare")
-	public ResponseEntity<?> updateMovie(@RequestHeader(value = "deviceId") String deviceId,
+	public ResponseEntity<?> buyShare(@RequestHeader(value = "deviceId") String deviceId,
 			@RequestHeader(value = "phoneNumber") String phoneNumber,
-			@RequestHeader(value = "accessToken") String accessToken, @RequestBody MovieInvestRequest movieInvestdReq) {
-		return ResponseEntity.status(HttpStatus.OK).body(movieInvestService.getBuyShares(movieInvestdReq, phoneNumber));
+		   @RequestBody MovieInvestRequest movieInvestdReq) {
+		return HttpResponseUtility.getHttpSuccess(movieInvestService.getBuyShares(movieInvestdReq, phoneNumber));
 	}
 
+	@PostMapping("/calculate-offer")
+	public ResponseEntity<?> getCalculateOffer(
+		   @RequestBody MovieOfferCalculatorRequest movieInvestdReq) {
+		return    HttpResponseUtility.getHttpSuccess( movieInvestService.getCalculateOfferMoney(movieInvestdReq));
+	}
+
+	
+	
+
+	@PostMapping("/redirect-to-payment")
+	public ResponseEntity<?> getPaymentRedirectCalculate(
+		   @RequestBody SharePaymentRequest sharePaymentRequest) {
+		return    HttpResponseUtility.getHttpSuccess( movieInvestService.validatePaymentForShares(sharePaymentRequest));
+	}
+
+	
+	@PostMapping("/payment/update-status")
+	public ResponseEntity<?> updatePaymentStatus(@RequestBody PaymentUpdateRequest request) {
+		movieInvestService.updatePaymentStatusTesting(request);
+	    return HttpResponseUtility.getHttpSuccess("only for testing trigger");
+	}
+
+	
+	
+	
 	@GetMapping("/dataTableUserInvestment")
-	public ResponseEntity<?> getPaginatedRewards(@RequestHeader(value = "deviceId") String deviceId,
-			@RequestHeader(value = "phoneNumber") String phoneNumber,
-			@RequestHeader(value = "accessToken") String accessToken, @RequestParam int draw, @RequestParam int start,
+	public ResponseEntity<?> getPaginatedRewards(	 int draw, @RequestParam int start,
 			@RequestParam int length, @RequestParam(required = false) String searchText,
 			@RequestParam(defaultValue = "id") String sortColumn, @RequestParam(defaultValue = "asc") String sortOrder,
 			@RequestParam(required = false) String language, @RequestParam(required = false) String movie,
@@ -65,6 +99,7 @@ public class MovieInvestController {
 		int moviex = movie == null || movie.isEmpty() ? 0 : Integer.parseInt(movie);
 		status = status == null || status.isEmpty() ? null : status;
 		searchText = searchText == null || searchText.isEmpty() ? null : searchText;
+		System.out.println("searchText " + searchText + "status " + status + " languagex "+ languagex);
 
 		Page<UserInvestmentSectionDTO> page = movieInvestService.getMovieInvestForUserInvestSection(languagex, moviex,
 				status, searchText, start, length, sortColumn, sortOrder);

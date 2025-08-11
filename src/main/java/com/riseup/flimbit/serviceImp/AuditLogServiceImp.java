@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,8 @@ import com.riseup.flimbit.response.AuditGroupResponse;
 import com.riseup.flimbit.response.KeyValueResponse;
 import com.riseup.flimbit.utility.DateUtility;
 import com.riseup.flimbit.utility.JsonUtil;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuditLogServiceImp {
@@ -32,10 +35,42 @@ public class AuditLogServiceImp {
 	@Autowired
 	SystemSettingsRepository  systemRepository;
 	
+	
 	public void logAction(int userId, String actionType, String entityName, 
 			int entityId, String description, Object requestData) {
 		
-	 Optional<SystemSettings> sysSettingOPt   =	systemRepository.findByKeyIgnoreCaseAndGroupNameIgnoreCase(EntityName.AUDIT_LOG.name(), EntityName.AUDIT_LOG.name());
+	 Optional<SystemSettings> sysSettingOPt   =	systemRepository.findByKeyIgnoreCaseAndGroupNameIgnoreCase("", EntityName.AUDIT_LOG.name());
+		
+	 if (!sysSettingOPt.isPresent() || sysSettingOPt.get().getValue().equalsIgnoreCase("active")) {	 
+	 
+		  try {
+			  
+			  String json = (requestData != null) 
+		                ? new ObjectMapper().writeValueAsString(requestData) 
+		                : "{}";
+       
+
+        auditLogRepository.saveAudit(actionType,new Timestamp(System.currentTimeMillis())
+        		,description,entityId,entityName,json,userId);
+		  }
+		  catch (JsonProcessingException e) {
+		        throw new RuntimeException("Failed to serialize status request for audit", e);
+		    }
+    }
+	 else
+	 {
+		//  generate Warning Mail to activate  audit
+	 }
+	
+	}
+	
+    
+    
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void logActionNoTrx(int userId, String actionType, String entityName, 
+			int entityId, String description, Object requestData) {
+		
+	 Optional<SystemSettings> sysSettingOPt   =	systemRepository.findByKeyIgnoreCaseAndGroupNameIgnoreCase("AUDIT_LOG", EntityName.AUDIT_LOG.name());
 		
 	 if (!sysSettingOPt.isPresent() || sysSettingOPt.get().getValue().equalsIgnoreCase("active")) {	 
 	 

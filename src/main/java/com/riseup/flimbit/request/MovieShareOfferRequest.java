@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 public class MovieShareOfferRequest {
     private Long offerId;
-    private Long shareTypeId;
+    private int shareTypeId;
     private Long movieId;
     private String validFrom;
     private String validTo;
@@ -24,4 +24,8 @@ public class MovieShareOfferRequest {
     private Boolean promoCodeRequired;
     private Boolean noPlatFormCommission;
     private String status;
+    
+    boolean isBuyAndGet ;
+    int buyCount;
+    int freeCount;
 }

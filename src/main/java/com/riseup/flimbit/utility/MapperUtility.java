@@ -121,6 +121,7 @@ public static OfferMovieDto groupMovieOfferData(List<MovieOfferFlatDto> flatList
             shareType.setShareStartDate(format(row.getShareStartDate()));
             shareType.setShareEndDate(format(row.getShareEndDate()));
             shareType.setOffers(new ArrayList<>());
+            
 
             shareMap.put(row.getShareTypeId(), shareType);
         }
@@ -141,10 +142,14 @@ public static OfferMovieDto groupMovieOfferData(List<MovieOfferFlatDto> flatList
             offer.setOfferTypeName(row.getOfferTypeName());
             offer.setMovShareOfferId(row.getMovShareOfferId());
             offer.setNoPlatFormCommission(row.getNoPlatFormCommission());
+            offer.setBuyQuantity(row.getBuyQuantity());
+            offer.setFreeQuantity(row.getfreeQuantity());
+            offer.setIsBuyAndGet(row.getIsBuyAndGet());
+            offer.setTargetAudience(row.getTargetAudience());
+            offer.setMaxUsers(row.getMaxUsers());
             shareType.getOffers().add(offer);
         }
     }
-
     movie.getShareTypes().addAll(shareMap.values());
     return movie;
 }

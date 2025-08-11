@@ -17,5 +17,10 @@ String getMovieName();
     int getTotalShares();
     int getMovieId();
     int getUserId();
-
+    int getPerShareAmount();
+    int getTotalFreeShare();
+    BigDecimal getTotalDiscountAmount();
+    BigDecimal getTotalWalletDiscountAmount();
+    String getCreatedDate();
+    String getUpdateDate();
 }

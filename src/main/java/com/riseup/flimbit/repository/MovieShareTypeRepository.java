@@ -10,7 +10,7 @@ import com.riseup.flimbit.entity.dto.ShareTypeDTO;
 
 import java.util.List;
 
-public interface MovieShareTypeRepository extends JpaRepository<MovieShareType, Long> {
+public interface MovieShareTypeRepository extends JpaRepository<MovieShareType, Integer> {
     List<MovieShareType> findByMovieId(Long movieId);
     
     @Query(value = " select st.* , sum(mi.number_of_shares) as soldShare"

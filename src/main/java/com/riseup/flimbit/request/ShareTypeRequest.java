@@ -10,7 +10,7 @@ import lombok.Setter;
 @Builder
 public class ShareTypeRequest {
 	
-    private Long id;
+    private int id;
     private Integer categoryId;
     private String name;
     private String startDate;

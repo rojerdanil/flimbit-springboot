@@ -54,7 +54,6 @@ public class PayOutServiceImp implements PayoutService {
 		
 	    int page = start / length;
 	    
-	    System.out.println(language + movie + status);
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortOrder), sortColumn);
         Pageable pageable = PageRequest.of(page, length, sort);

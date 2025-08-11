@@ -37,10 +37,14 @@ public class PayoutController {
 	@GetMapping("/dataTableUserPayout")
 	public ResponseEntity<?> getDataTableUserPayout(@RequestHeader(value = "deviceId") String deviceId,
 			@RequestHeader(value = "phoneNumber") String phoneNumber,
-			@RequestHeader(value = "accessToken") String accessToken, @RequestParam int draw, @RequestParam int start,
+			@RequestHeader(value = "accessToken") String accessToken,
+			@RequestParam int draw, 
+			@RequestParam int start,
 			@RequestParam int length, @RequestParam(required = false) String searchText,
-			@RequestParam(defaultValue = "id") String sortColumn, @RequestParam(defaultValue = "asc") String sortOrder,
-			@RequestParam(required = false) String language, @RequestParam(required = false) String movie,
+			@RequestParam(defaultValue = "id") String sortColumn,
+			@RequestParam(defaultValue = "asc") String sortOrder,
+			@RequestParam(required = false) String language, 
+			@RequestParam(required = false) String movie,
 			@RequestParam(required = false) String status) {
 
 		int languagex = language == null || language.isEmpty() ? 0 : Integer.parseInt(language);

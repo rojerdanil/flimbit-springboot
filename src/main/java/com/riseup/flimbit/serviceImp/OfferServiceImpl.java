@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.entity.Offer;
 import com.riseup.flimbit.entity.dto.MovieOfferFlatDto;
+import com.riseup.flimbit.entity.dto.OfferDTO;
 import com.riseup.flimbit.repository.OfferRepository;
 import com.riseup.flimbit.request.OfferRequest;
 import com.riseup.flimbit.response.CommonResponse;
@@ -19,6 +20,7 @@ import com.riseup.flimbit.utility.MapperUtility;
 
 import jakarta.transaction.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -65,19 +67,15 @@ public class OfferServiceImpl implements OfferService {
     }
 
 	@Override
-	public Page<Offer> getPagedOfferTypes(int start, int length, String search, String sortColumn,
+	public Page<OfferDTO> getPagedOfferTypes(int start, int length, String search, String sortColumn,
 			String sortOrder) {
 		// TODO Auto-generated method stub
 		
 	    	 int page = start / length;
 	         Sort sort = Sort.by(Sort.Direction.fromString(sortOrder), sortColumn);
 	         Pageable pageable = PageRequest.of(page, length, sort);
-	        if (search != null && !search.isEmpty()) {
-	            return offerRepository.findByOfferNameContainingIgnoreCase(search, pageable);
-	        } else {
-	            return offerRepository.findAll(pageable);
-	        }
-	    
+	        return   offerRepository.getFilterPartnerDataTable(search,pageable);
+	       
 	}
 
 	@Override
@@ -119,4 +117,7 @@ public class OfferServiceImpl implements OfferService {
 			throw new RuntimeException("movie is not found " +movieId);
 		return MapperUtility.groupMovieOfferData(listDto);
 	}
+	
+  
+
 }

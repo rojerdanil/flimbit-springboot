@@ -12,5 +12,16 @@ public enum EntityName {
     SYSTEM_SETTING,
     AUDIT_LOG,
     ACTOR,
-    ADMIN_USER
+    ADMIN_USER,
+    AUTHENTICATION,
+    OFFER_CACCULATE,
+    USER_WALLET,
+    OFFER,
+    SMS,
+    EMAIL,
+    PAN,
+    PAYMENT,
+    PAYMENT_FAILURE,
+    MOVIE_PAYOUT,
+    SCHEDULER
 }

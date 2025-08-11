@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.entity.Offer;
 import com.riseup.flimbit.entity.OfferType;
+import com.riseup.flimbit.entity.dto.OfferDTO;
 import com.riseup.flimbit.request.OfferRequest;
 import com.riseup.flimbit.request.OfferTypeRequest;
 import com.riseup.flimbit.response.CommonResponse;
@@ -37,7 +38,7 @@ public class OfferController {
 			@RequestParam(required = false) String searchText, @RequestParam(defaultValue = "id") String sortColumn,
 			@RequestParam(defaultValue = "asc") String sortOrder) {
 
-		Page<Offer> offerPage = offerService.getPagedOfferTypes(start, length, searchText, sortColumn, sortOrder);
+		Page<OfferDTO> offerPage = offerService.getPagedOfferTypes(start, length, searchText, sortColumn, sortOrder);
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("draw", draw);

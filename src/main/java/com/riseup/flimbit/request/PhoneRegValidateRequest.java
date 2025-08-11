@@ -10,5 +10,6 @@ import lombok.Setter;
 public class PhoneRegValidateRequest {
 	String phoneNumber;
 	String otp;
+	String sessionId;
 
 }

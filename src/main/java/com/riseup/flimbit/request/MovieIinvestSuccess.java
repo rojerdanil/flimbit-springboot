@@ -12,7 +12,7 @@ import lombok.Setter;
 public class MovieIinvestSuccess {
 	int movieId; 
 	int numberOfNewShares; 
-	int perShareAmount;
+	BigDecimal perShareAmount;
 	int numberOfOldShares;
 	BigDecimal oldShareAmount;
 	

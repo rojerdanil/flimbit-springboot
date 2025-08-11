@@ -43,8 +43,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 					        uwb.last_updated as walletUpdate
 
 					    FROM users us
-					    JOIN user_status usst ON us.id = usst.user_id
-					    JOIN languages lan ON lan.id = us.language
+					    left JOIN user_status usst ON us.id = usst.user_id
+					    left JOIN languages lan ON lan.id = us.language
 					    left JOIN user_wallet_balance uwb on us.id = uwb.user_id
 					    WHERE
 			    (
@@ -118,6 +118,26 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 		List<ChartProjectionDTO> getMonthlyUserRegistrationChart();
 	
 	
+	Optional<User> findByEmail(String email);
+	Optional<User> findByPanId(String pan);
 
+	
+	@Query(value = """
+		    SELECT CASE WHEN COUNT(u.id) > 0 THEN TRUE ELSE FALSE END
+		    FROM users u
+		    JOIN user_status us ON u.id = us.user_id
+		    WHERE u.email = :email and  us.is_email_verified = true
+		    """, nativeQuery = true)
+		boolean existsByEmail(@Param("email") String email);
+
+	@Query(value = """
+		    SELECT CASE WHEN COUNT(u) > 0 THEN TRUE ELSE FALSE END
+    FROM users u
+    JOIN user_status us ON u.id = us.user_id
+    WHERE u.pan_id = :panId and us.is_pan_verified = true
+		    """, nativeQuery = true)
+   boolean existsByPan(@Param("panId") String pan);
+
+	
 }
  

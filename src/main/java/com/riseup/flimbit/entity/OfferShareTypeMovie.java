@@ -25,7 +25,7 @@ public class OfferShareTypeMovie {
 	    private Long offerId;
 
 	    @Column(name = "share_type_id", nullable = false)
-	    private Long shareTypeId;
+	    private int shareTypeId;
 
 	    @Column(name = "movie_id", nullable = false)
 	    private Long movieId;
@@ -62,4 +62,14 @@ public class OfferShareTypeMovie {
 
 	    @Column(name = "updated_at")
 	    private Timestamp updatedAt = new Timestamp(System.currentTimeMillis());
+	    
+	    // New columns for Buy 1 Get 1
+	    @Column(name = "buy_one_get_one")
+	    private Boolean buyOneGetOne = false;
+
+	    @Column(name = "buy_quantity")
+	    private Integer buyQuantity = 1;
+
+	    @Column(name = "get_quantity")
+	    private Integer getQuantity = 1;
 }

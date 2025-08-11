@@ -6,21 +6,22 @@ import org.springframework.stereotype.Service;
 import com.riseup.flimbit.entity.MovieShareType;
 import com.riseup.flimbit.entity.OfferShareTypeMovie;
 import com.riseup.flimbit.repository.MovieShareTypeRepository;
-import com.riseup.flimbit.repository.OfferShareTypeMovieRepository;
+import com.riseup.flimbit.repository.MovieShareOfferMapRepository;
 import com.riseup.flimbit.request.MovieShareOfferRequest;
-import com.riseup.flimbit.service.OfferShareTypeMovieService;
+import com.riseup.flimbit.service.MovieShareOfferMapService;
 import com.riseup.flimbit.utility.DateUtility;
 
 import jakarta.transaction.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
 @Service
-public class OfferShareTypeMovieServiceImpl implements OfferShareTypeMovieService {
+public class MovieShareOfferMapServiceImpl implements MovieShareOfferMapService {
 
     @Autowired
-    private OfferShareTypeMovieRepository repository;
+    private MovieShareOfferMapRepository repository;
     
     @Autowired
     MovieShareTypeRepository  movieshareTypeRepo;
@@ -60,6 +61,9 @@ public class OfferShareTypeMovieServiceImpl implements OfferShareTypeMovieServic
     	offerShareMovie.setValidTo(endDate);
     	offerShareMovie.setWalletCreditAmount(offerReq.getWalletCreditAmount());
     	offerShareMovie.setNoPlatFormCommission(offerReq.getNoPlatFormCommission());
+    	offerShareMovie.setBuyOneGetOne(offerReq.isBuyAndGet());
+    	offerShareMovie.setBuyQuantity(offerReq.getBuyCount());
+    	offerShareMovie.setGetQuantity(offerReq.getFreeCount());
 
         return repository.save(offerShareMovie);
     	}
@@ -123,10 +127,41 @@ public class OfferShareTypeMovieServiceImpl implements OfferShareTypeMovieServic
     	offerShareMovie.setValidTo(endDate);
     	offerShareMovie.setWalletCreditAmount(offerReq.getWalletCreditAmount());
     	offerShareMovie.setNoPlatFormCommission(offerReq.getNoPlatFormCommission());
+    	offerShareMovie.setBuyOneGetOne(offerReq.isBuyAndGet());
+    	offerShareMovie.setBuyQuantity(offerReq.getBuyCount());
+    	offerShareMovie.setGetQuantity(offerReq.getFreeCount());
+
         return repository.save(offerShareMovie);
     	}
     	else
             throw new RuntimeException("Offer start date and end date is greater than Share start Date and and End date" + offerReq.getShareTypeId());
 
 	}
+	
+	  public BigDecimal calculateDiscountedAmount(Long movieId, Long shareTypeId, BigDecimal originalAmount) {
+	        // Fetch active offers
+	        List<OfferShareTypeMovie> activeOffers = repository.findActiveOffers(movieId, shareTypeId);
+
+	        BigDecimal discountedAmount = originalAmount;
+
+	        for (OfferShareTypeMovie offer : activeOffers) {
+	            if (offer.getBuyOneGetOne()) {
+	                // Apply "Buy 1 Get 1" offer - buy 1, get 1 free
+	                discountedAmount = discountedAmount.multiply(BigDecimal.valueOf(offer.getBuyQuantity()))
+	                                                     .divide(BigDecimal.valueOf(offer.getGetQuantity()));
+	            }
+
+	            // Other offer types can be applied similarly, e.g., discountAmount
+	            if (offer.getDiscountAmount() != null) {
+	                discountedAmount = discountedAmount.subtract(offer.getDiscountAmount());
+	            }
+
+	            // If you have wallet credit amount, apply it
+	            if (offer.getWalletCreditAmount() != null) {
+	                discountedAmount = discountedAmount.subtract(offer.getWalletCreditAmount());
+	            }
+	        }
+
+	        return discountedAmount;
+	    }
 }

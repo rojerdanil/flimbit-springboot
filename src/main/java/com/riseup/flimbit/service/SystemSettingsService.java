@@ -28,8 +28,9 @@ public class SystemSettingsService {
 
 	    // Fetch value based on key and group name
 	    public String getValue(String key, String groupName) {
-	        SystemSettings setting = systemSettingsRepository.findByKeyIgnoreCaseAndGroupNameIgnoreCase (key, groupName)
-	        		.orElseThrow(() -> new RuntimeException("Key and Type is not found " + key + " "+ groupName));
+	    	SystemSettings setting = systemSettingsRepository
+	    	        .findByKeyIgnoreCaseAndGroupNameIgnoreCase(key, groupName)
+	    	        .orElse(null);
 	        return setting != null ? setting.getValue() : null;
 	    }
 

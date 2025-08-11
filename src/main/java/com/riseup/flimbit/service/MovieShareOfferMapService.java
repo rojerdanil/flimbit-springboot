@@ -5,7 +5,7 @@ import java.util.List;
 import com.riseup.flimbit.entity.OfferShareTypeMovie;
 import com.riseup.flimbit.request.MovieShareOfferRequest;
 
-public interface OfferShareTypeMovieService {
+public interface MovieShareOfferMapService {
 	 OfferShareTypeMovie save(MovieShareOfferRequest offerShareTypeMovie);
 	 
 	 OfferShareTypeMovie update(long id,MovieShareOfferRequest offerShareTypeMovie);

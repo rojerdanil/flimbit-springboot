@@ -8,5 +8,7 @@ public enum ActionType {
     LOGIN,
     LOGOUT,
     APPROVE,
-    REJECT
+    REJECT,
+    MISMATCH,
+    CRITICAL
 }
