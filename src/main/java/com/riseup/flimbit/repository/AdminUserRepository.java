@@ -16,6 +16,7 @@ import com.riseup.flimbit.entity.dto.UserWithStatusWebDto;
 @Repository
 public interface AdminUserRepository extends JpaRepository<AdminUser, Integer> {
 
+	
 	@Query(value = """
 		    SELECT au.*, rol.name AS roleName
 		    FROM admin_users au
