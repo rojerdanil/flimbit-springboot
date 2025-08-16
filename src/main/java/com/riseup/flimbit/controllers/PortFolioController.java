@@ -26,9 +26,9 @@ public class PortFolioController {
 	PortfolioService portfolioService;
 	
 	@GetMapping("/portfolioSummery")
-	public ResponseEntity<?> getMsg(@RequestHeader(value="deviceId") String deviceId,
-	@RequestHeader(value="phoneNumber") String phoneNumber,
-	@RequestHeader(value="accessToken") String accessToken)
+	public ResponseEntity<?> getMsg(
+	@RequestHeader(value="phoneNumber") String phoneNumber
+	)
 	{
         return ResponseEntity.status(HttpStatus.OK).body(portfolioService.getPortFolioByUserPhone(phoneNumber));
 

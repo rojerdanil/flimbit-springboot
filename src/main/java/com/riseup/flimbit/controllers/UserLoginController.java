@@ -21,12 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.entity.dto.UserInvestmentSectionDTO;
-import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
+import com.riseup.flimbit.entity.dto.UserWithStatusWebDto;
 import com.riseup.flimbit.request.EmailRequest;
 import com.riseup.flimbit.request.PanRequest;
 import com.riseup.flimbit.request.PhoneRegValidateRequest;
 import com.riseup.flimbit.request.PhoneRegisterRequest;
 import com.riseup.flimbit.request.RefreshTokenRequest;
+import com.riseup.flimbit.request.RegisterUserName;
 import com.riseup.flimbit.request.StatusRequest;
 import com.riseup.flimbit.request.UserRequest;
 import com.riseup.flimbit.response.CommonResponse;
@@ -52,13 +53,12 @@ public class UserLoginController {
 		return "FlimBit service is running";
 	}
 	
-		@PostMapping("/updateUser")
-    public ResponseEntity<?> refresh(@RequestHeader(value="deviceId") String deviceId,
+		@PostMapping("/mobile/updateUserName")
+    public ResponseEntity<?> updateUser(@RequestHeader(value="X-Device-ID") String deviceId,
     		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
-    		@RequestBody UserRequest userRequest)
+    		@RequestBody RegisterUserName userRequest)
     {
-		return ResponseEntity.status(HttpStatus.OK).body(userRegisterService.updateUser(userRequest,phoneNumber));
+		return HttpResponseUtility.getHttpSuccess(userRegisterService.updateUser(userRequest,phoneNumber));
 
     }
     
@@ -88,7 +88,7 @@ public class UserLoginController {
        
     	
 
-	    Page<UserWithStatusDTO> page = userRegisterService.fetchAllUsersWithStatus
+	    Page<UserWithStatusWebDto> page = userRegisterService.fetchAllUsersWithStatus
 	    		( languagex,moviex,status,searchText,start, length,  sortColumn, sortOrder);
 	    Map<String, Object> response = new HashMap<>();
         response.put("draw", draw);
@@ -129,6 +129,21 @@ public class UserLoginController {
 	//	return new ResponseEntity<>(userRegisterService.validateRegPhoneOtp(phoneValidateRequest,deviceId),HttpStatus.OK);
 		return HttpResponseUtility.getHttpSuccess(userRegisterService.verifyEmail(code));		
 	}
+	@GetMapping(path= "/mobile/verifyLanguage/{code}",  produces = "application/json")
+	ResponseEntity<?> getVerifyLanguage(@PathVariable String code)
+	{
+		try {
+			    long langId = Long.parseLong(code);
+				return HttpResponseUtility.getHttpSuccess(userRegisterService.verifyLanguage(langId));		
+
+
+		}catch (NumberFormatException e) {
+	        throw new RuntimeException("Invalid long value: ");
+	    }
+		
+	//	return new ResponseEntity<>(userRegisterService.validateRegPhoneOtp(phoneValidateRequest,deviceId),HttpStatus.OK);
+	}
+	
 	
 	@PostMapping(path= "/mobile/initiatePan", consumes = "application/json", produces = "application/json")
 	ResponseEntity<?> sendPanInitiate(@RequestBody PanRequest panRequest)
@@ -138,5 +153,23 @@ public class UserLoginController {
 		return HttpResponseUtility.getHttpSuccess(userRegisterService.initiatePan(panRequest));		
 	}
 	
+	@GetMapping(path= "/mobile/userProfile",  produces = "application/json")
+	ResponseEntity<?> getUserProfileData()
+	{
+		
+	return new ResponseEntity<>(userRegisterService.getUserProfileMobile(),HttpStatus.OK);
+	}
+	
+	@PostMapping("/mobile/refresh")
+	public ResponseEntity<?> refresh(@RequestHeader(value = "X-Device-ID") String deviceId,
+			@RequestHeader(value = "phoneNumber") String phoneNumber, @RequestBody RefreshTokenRequest refreshRequest) {
+		CommonResponse commonToken = userRegisterService.genRefreshToken(deviceId, phoneNumber, refreshRequest);
 
+		if (commonToken.getStatus() != Messages.SUCCESS) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
+		}
+
+		return ResponseEntity.status(HttpStatus.OK).body(commonToken);
+
+	}
 }

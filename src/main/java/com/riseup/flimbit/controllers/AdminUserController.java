@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.riseup.flimbit.entity.AdminUser;
 import com.riseup.flimbit.entity.dto.AdminUserDTO;
-import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
+import com.riseup.flimbit.entity.dto.UserWithStatusWebDto;
 import com.riseup.flimbit.request.AdminUserRequest;
 import com.riseup.flimbit.service.AdminUserService;
 import com.riseup.flimbit.utility.HttpResponseUtility;

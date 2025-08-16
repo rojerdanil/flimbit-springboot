@@ -12,6 +12,7 @@ import java.util.Random;
 
 import javax.management.RuntimeErrorException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +33,14 @@ import com.riseup.flimbit.constant.EntityName;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.constant.PromotionTypeEnum;
 import com.riseup.flimbit.constant.StatusEnum;
+import com.riseup.flimbit.entity.Language;
 import com.riseup.flimbit.entity.PromoCode;
 import com.riseup.flimbit.entity.PromotionType;
 import com.riseup.flimbit.entity.ReferralTracking;
 import com.riseup.flimbit.entity.User;
 import com.riseup.flimbit.entity.UserPromoCode;
 import com.riseup.flimbit.entity.UserStatus;
-import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
+import com.riseup.flimbit.entity.dto.UserWithStatusWebDto;
 import com.riseup.flimbit.gateway.email.EmailService;
 import com.riseup.flimbit.gateway.pan.PanService;
 import com.riseup.flimbit.gateway.pan.PanVerificationResponse;
@@ -46,6 +48,7 @@ import com.riseup.flimbit.gateway.pan.SurePassAuthService;
 import com.riseup.flimbit.gateway_sms.OtpResponse;
 import com.riseup.flimbit.gateway_sms.OtpService;
 import com.riseup.flimbit.gateway_sms.TwoFactorResponse;
+import com.riseup.flimbit.repository.LanguageRepository;
 import com.riseup.flimbit.repository.PromoCodeRepository;
 import com.riseup.flimbit.repository.PromotionTypeRepository;
 import com.riseup.flimbit.repository.ReferralTrackingRepository;
@@ -58,12 +61,14 @@ import com.riseup.flimbit.request.PanRequest;
 import com.riseup.flimbit.request.PhoneRegValidateRequest;
 import com.riseup.flimbit.request.PhoneRegisterRequest;
 import com.riseup.flimbit.request.RefreshTokenRequest;
+import com.riseup.flimbit.request.RegisterUserName;
 import com.riseup.flimbit.request.StatusRequest;
 import com.riseup.flimbit.request.UserRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.PhoneOtpResponse;
 import com.riseup.flimbit.response.SuccessResponse;
 import com.riseup.flimbit.response.TokenResponse;
+import com.riseup.flimbit.response.UserProfileResponse;
 import com.riseup.flimbit.security.UserContext;
 import com.riseup.flimbit.security.UserContextHolder;
 import com.riseup.flimbit.service.UserRegisterService;
@@ -128,6 +133,9 @@ public class UserRegisterServiceImp implements UserRegisterService {
 	 @Autowired
 	 ConfigCacheService  configCacheService;
 	 
+	 @Autowired
+	 LanguageRepository languageRepo;
+	 
 	@Override
 	public CommonResponse generateRegPhoneOtp(PhoneRegisterRequest phoneRegRequest) {
 		// TODO Auto-generated method stub
@@ -163,14 +171,14 @@ public class UserRegisterServiceImp implements UserRegisterService {
 			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.REG_OTP_EXPIRY).build();
 
 		}
-		*/
+		
 		
 		try {
 			emailService.sendVerificationEmail("rojer127@gmail.com", "test");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}  */
 		
 
 		Optional<User> existUser = userRepository.findByphoneNumber(phRegValiReq.getPhoneNumber());
@@ -208,7 +216,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 			userStatus.setUserId(Integer.parseInt(id + ""));
 			userStatus.setPhoneVerified(true);
 			userStatusRespository.save(userStatus);
-			TokenResponse tokenRes = TokenResponse.builder().accessToken(token).refreshToken(refreshToken)
+			TokenResponse tokenRes = TokenResponse.builder().accessToken(tokenEnc).refreshToken(refreshTokenEnc)
 					.accessTokenExpiry(jwtService.extractExpiration(token).toInstant())
 					.refreshTokenExpiry(jwtService.extractExpiration(refreshToken).toInstant()).build();
 			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(tokenRes).build();
@@ -221,7 +229,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 
 	@Override
 	@Transactional
-	public CommonResponse updateUser(UserRequest userRequest, String phoneNumber) {
+	public String updateUser(RegisterUserName userRequest, String phoneNumber) {
 		// TODO Auto-generated method stub
 		Optional<User> userOpt = userRepository.findByphoneNumber(phoneNumber);
 		if (userOpt.isPresent()) {
@@ -232,61 +240,45 @@ public class UserRegisterServiceImp implements UserRegisterService {
 						userStatusNew.setUserId(Integer.parseInt(user.getId() + ""));
 						return userStatusNew;
 					});
+			if (StringUtils.isBlank(userRequest.getFirstName()) || StringUtils.isBlank(userRequest.getLastName())) {
+			    throw new RuntimeException("First name/Last name cannot be empty");
+			}
+				
 
-			if (CommonUtilty.checkEmptyOrNull(userRequest.getFirstName())) {
+			
 				user.setFirstName(userRequest.getFirstName());
-				if (userRequest.getUserStatusVerify().isNamesVerified())
+				user.setLastName(userRequest.getLastName());				
 					userStatus.setNamesVerified(true);
-			}
-			if (CommonUtilty.checkEmptyOrNull(userRequest.getLastName())) {
-				user.setLastName(userRequest.getLastName());
-			}
-			if (CommonUtilty.checkEmptyOrNull(userRequest.getEmail())) {
-				user.setEmail(userRequest.getEmail());
-				if (userRequest.getUserStatusVerify().isEmailVerified())
-					userStatus.setEmailVerified(true);
-			}
-			if (CommonUtilty.checkEmptyOrNull(userRequest.getPanId())) {
-				user.setPanId(userRequest.getPanId());
-				if (userRequest.getUserStatusVerify().isPanVerified())
-					userStatus.setPanVerified(true);
-			}
-			if (CommonUtilty.checkEmptyOrNull(userRequest.getStatus())) {
-				user.setStatus(userRequest.getStatus());
-			}
-			if (user.getLanguage() != 0) {
-				user.setLanguage(userRequest.getLanguage());
-				if (userRequest.getUserStatusVerify().isLanguageVerified())
-					userStatus.setLanguageVerified(true);
-			}
+			
+		
 
 			userRepository.save(user);
 			userStatusRespository.save(userStatus);
-			long userIdLong = user.getId();
+			/*long userIdLong = user.getId();
 			List<String> referalList = List.of(PromotionTypeEnum.WELCOME.name().toLowerCase());
 			List<UserPromoCode> listUserPromo = userPromoCodeRepository.findByUserIdAndTypeCodesIgnoreCase(userIdLong,
 					referalList);
 			boolean isWelcomeUser = listUserPromo == null || listUserPromo.size() == 0 ? true : false;
-			System.out.println("size x" + listUserPromo.size() + " " + isWelcomeUser);
+			logger.info("size x" + listUserPromo.size() + " " + isWelcomeUser);
 			if (isWelcomeUser) {
-				System.out.println("new user welcome");
-				assignWelecomePromoForNewUser(user);
-				generateReferralPromoCodeForUser(user);
-			}
+				logger.info("new user welcome promocode applied");
+				//assignWelecomePromoForNewUser(user);
+				//generateReferralPromoCodeForUser(user);
+			} */
 
-			if (CommonUtilty.checkEmptyOrNull(userRequest.getPromoCode()) && isWelcomeUser) {
+		//	if (CommonUtilty.checkEmptyOrNull(userRequest.getPromoCode()) && isWelcomeUser) {
 
-				System.out.println("promocode is available " + userRequest.getPromoCode());
+				//System.out.println("promocode is available " + userRequest.getPromoCode());
 
-				applyReferralCodeDuringSignup(user, userRequest.getPromoCode());
-			}
+				//applyReferralCodeDuringSignup(user, userRequest.getPromoCode());
+		//	}
 
-			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_UPATE_SUCCESS)
-					.build();
+			return "User name has been added successfully.";
 		}
+		
+		throw new RuntimeException(Messages.REG_PHONE_NUMBER_NOT_FOUND);
 
-		return CommonResponse.builder().status(Messages.STATUS_FAILURE).message(Messages.REG_PHONE_NUMBER_NOT_FOUND)
-				.build();
+	
 
 	}
 
@@ -418,23 +410,41 @@ public class UserRegisterServiceImp implements UserRegisterService {
 	@Override
 	public CommonResponse genRefreshToken(String deviceId, String phoneNumber, RefreshTokenRequest refreshRequest) {
 		// TODO Auto-generated method stub
-		String refreshToken = refreshRequest.getRefreshToken();
-		boolean isValid = jwtService.validateMobileToken(refreshRequest.getRefreshToken(), deviceId, phoneNumber);
+		
+		logger.info("entering into getRefresh token");
+		UserContext  loginUser = UserContextHolder.getContext();
+		
+		phoneNumber = loginUser.getPhone();
+		
+		deviceId  = loginUser.getDeviceId();
+		logger.info("entering into getRefresh token "+ phoneNumber  + " " + deviceId);
+		
+        String decriptedToken = tokenEncryptor.decrypt(refreshRequest.getRefreshToken());
+
+		
+		boolean isValid = jwtService.validateMobileToken(decriptedToken, deviceId, phoneNumber);
 
 		if (!isValid)
 		{
 		   throw new RuntimeException("Token invalid");
 		}
-		String token = jwtService.createMobileToken(phoneNumber + ":" + deviceId, false);
 		
 		Optional<User> userOpt = userRepository.findByphoneNumber(phoneNumber);
 		if (userOpt.isPresent()) {
+			String token = jwtService.createMobileToken(phoneNumber + ":" + deviceId, false);
+			String refreshToken = jwtService.createMobileToken(phoneNumber + ":" + deviceId, true);
+
+			String tokenEnc = tokenEncryptor.encrypt(token);
+			String refreshTokenEnc = tokenEncryptor.encrypt(refreshToken);
+			
 			User user = userOpt.get();
-			user.setAccessKey(token);
-			userRepository.save(user);
-			TokenResponse tokenRes = TokenResponse.builder().accessToken(token).refreshToken(refreshToken)
-					.accessTokenExpiry(jwtService.extractExpiration(token).toInstant())
-					.refreshTokenExpiry(jwtService.extractExpiration(refreshToken).toInstant()).build();
+			    user.setAccessKey(tokenEnc);
+		        user.setRefreshToken(refreshTokenEnc);
+		        user.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+		        userRepository.save(user);		
+				TokenResponse tokenRes = TokenResponse.builder().accessToken(tokenEnc).refreshToken(refreshTokenEnc)
+						.accessTokenExpiry(jwtService.extractExpiration(token).toInstant())
+						.refreshTokenExpiry(jwtService.extractExpiration(refreshToken).toInstant()).build();
 
 			return CommonResponse.builder().status(Messages.STATUS_SUCCESS).result(tokenRes).build();
 
@@ -445,7 +455,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 	}
 
 	@Override
-	public Page<UserWithStatusDTO> fetchAllUsersWithStatus(int language, int movie, String status, String searchText,
+	public Page<UserWithStatusWebDto> fetchAllUsersWithStatus(int language, int movie, String status, String searchText,
 			int start, int length, String sortColumn, String sortOrder) {
 		// TODO Auto-generated method stub
 
@@ -543,11 +553,13 @@ public class UserRegisterServiceImp implements UserRegisterService {
 	public User validateMobileUserToken(String phoneNumber, String deviceId,String token) {
 		// TODO Auto-generated method stub
 		logger.info("***** Validate validateMobileUserToken starts ******* " + phoneNumber);
-		try
+		try   
 		{
+			
 			if(token == null || token.trim().length()==0)
                 return null;  
            String decriptedToken = tokenEncryptor.decrypt(token);
+           logger.info("user comming");
 			
            Optional<User> userOpt = userRepository.findByphoneNumber(phoneNumber);
            if(!userOpt.isPresent())
@@ -569,6 +581,8 @@ public class UserRegisterServiceImp implements UserRegisterService {
       		 logger.info("Device Id is not matched . Device ID: " + deviceId + " : db :"+user.getDeviceId());
   		    return null;
       	 }
+      	 
+      	 
       boolean isValid =	jwtService.validateMobileToken(decriptedToken, user.getDeviceId(), user.getPhoneNumber());
            
         if(!isValid)
@@ -601,6 +615,10 @@ public class UserRegisterServiceImp implements UserRegisterService {
 		// TODO Auto-generated method stu
 	 logger.info("user " + loginUser.getDeviceId() + ":" + loginUser.getPhone() + ": otp :" +otp);
 	 
+	 if (StringUtils.isBlank(emailRequest.getEmail()) ) {
+		    throw new RuntimeException("Email name could not be empty");
+		}
+	 
 	 User user = userRepository.findByphoneNumber(loginUser.getPhone()).orElse(null);
 	 
 	 
@@ -625,7 +643,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 	  
 	  
              	  
-	 
+     user.setEmail(emailRequest.getEmail());
 	 
 	 user.setVerificationCode(otp);
 	 user.setUpdatedDate(new Timestamp(System.currentTimeMillis()));	
@@ -672,14 +690,13 @@ public class UserRegisterServiceImp implements UserRegisterService {
 				    user.getVerificationCodeExpiry().before(new Timestamp(System.currentTimeMillis()))) {
 			 throw new RuntimeException("Verification code has expired. Please request a new one. " );
 
-				}
+				}	
 		 
 		 UserStatus userStatus = userStatusRespository.findByuserId(user.getId())
 			        .orElseGet(() -> new UserStatus());
 		 
 		 if(userStatus.getUserId() != user.getId())
 			 userStatus.setUserId(user.getId());
-		 
 		 userStatus.setEmailVerified(true);
 				                 
           userStatusRespository.save(userStatus);	 
@@ -690,7 +707,7 @@ public class UserRegisterServiceImp implements UserRegisterService {
 
    @Transactional
 	@Override
-	public PanVerificationResponse initiatePan(PanRequest panRequest) {
+	public SuccessResponse initiatePan(PanRequest panRequest) {
 		// TODO Auto-generated method stub
 		 UserContext loginUser = 	UserContextHolder.getContext();
 		
@@ -721,22 +738,86 @@ public class UserRegisterServiceImp implements UserRegisterService {
 		 
      PanVerificationResponse  panVerResponse =	 panService.startVerification(panRequest);
      
-     if(panVerResponse != null && panVerResponse.isFinalStatus() )
+     if(panVerResponse == null)
+		    throw new RuntimeException("PAN Third Party Api is failed  ");
+     
+     if( panVerResponse.isFinalStatus() )
      {
     	    logger.info(" Going to update user pan update status");
     	    user.setPanId(panRequest.getPanNumber());
     	    UserStatus userStatus = userStatusRespository.findByuserId(user.getId())
-    	            .orElseGet(UserStatus::new);
+    	            .orElseThrow(() -> new RuntimeException("User status is not found"));
     	    userStatus.setUserId(user.getId());
     	    userStatus.setPanVerified(true);
+    		user.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
     	    userStatusRespository.save(userStatus);    
+    	    userRepository.save(user);
+    		return SuccessResponse.builder().status(Messages.STATUS_SUCCESS).message("PAN verified successfully").build();
+
     	    
+     }
+     else
+     {
+    	    logger.info(" Going to update user pan update status");
+    	    if(!panVerResponse.isSetDobMatch() )
+    		    throw new RuntimeException("PAN DOB is not matched  ");
+    	    if(!panVerResponse.isNameAsPerPanMatch() )
+    		    throw new RuntimeException("PAN Name is not matched  ");
+    	    	
      }
      
 	
-	System.out.println(panVerResponse);
+	logger.info ("Pan Response " + panVerResponse);
+    throw new RuntimeException("Some issue in PAN verification ");
 
-		return panVerResponse;
 	}
+
+
+
+@Override
+public SuccessResponse verifyLanguage(long langId) {
+	// TODO Auto-generated method stub
+	
+  Language  language =languageRepo.findById(langId).orElseThrow(() -> new RuntimeException("Given language is not found "));
+  UserContext loginUser = UserContextHolder.getContext();
+	 User user = userRepository.findByphoneNumber(loginUser.getPhone()).orElse(null);
+		
+	 if(user == null  )
+		 throw new RuntimeException("User is not found " );
+	 int languageId = (int) langId;
+	 UserStatus userStatus = userStatusRespository.findByuserId(user.getId())
+			         .orElseThrow(() -> new RuntimeException("User status is not found for user"));
+	           
+	 
+	 user.setLanguage(languageId);
+	 user.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+	 
+	 userStatus.setLanguageVerified(true);
+	  userStatusRespository.save(userStatus);    
+	   userRepository.save(user);
+	 
+
+		return SuccessResponse.builder().status(Messages.STATUS_SUCCESS).message("Language 	verified successfully").build();
+}
+
+
+
+@Override
+public UserProfileResponse getUserProfileMobile() {
+	// TODO Auto-generated method stub
+	UserContext loginUser = UserContextHolder.getContext();
+	 User user = userRepository.findByphoneNumber(loginUser.getPhone()).orElse(null);
+		
+	 if(user == null  )
+		 throw new RuntimeException("User is not found " );
+	 
+	 UserStatus userStatus = userStatusRespository.findByuserId(user.getId())
+	         .orElseThrow(() -> new RuntimeException("User status is not found for user"));
+	 user.setAccessKey("");
+	 user.setRefreshToken("");
+	 
+       
+	 return UserProfileResponse.builder().user(user).userStatus(userStatus).build()	;
+}
 
 }

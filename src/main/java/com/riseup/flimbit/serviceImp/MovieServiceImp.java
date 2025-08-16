@@ -13,10 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.constant.MovieStatusEnum;
+import com.riseup.flimbit.constant.StatusEnum;
 import com.riseup.flimbit.entity.InvestmentSummary;
 import com.riseup.flimbit.entity.Movie;
 import com.riseup.flimbit.entity.MovieShareSummaryInterface;
@@ -162,7 +164,8 @@ public class MovieServiceImp implements MovieService{
 		//List<MovieStatus> movieStatusListDb =  movieStatusRepo.findAll();
 		System.out.println("lang gu :" + movieSearchRequest.getLanguage());
 		List<MovieResponse> movieResList =CommonUtilty.mapToMovieRespFromMoiveEntity(
-				movieRepository.findByLanguageOrderByCreatedDate(movieSearchRequest.getLanguage(),movieSearchRequest.getLimit(),movieSearchRequest.getOffset(),"true"));
+				movieRepository.findByLanguageOrderByCreatedDate(movieSearchRequest.getLanguage(),movieSearchRequest.getLimit(),movieSearchRequest.getOffset()
+						,StatusEnum.ACTIVE.name().toLowerCase()));
 		
 			
 		return CommonResponse.builder().status(Messages.STATUS_SUCCESS).message(Messages.STATUS_SEARCH_SUCCESS).result(	
@@ -296,4 +299,15 @@ public class MovieServiceImp implements MovieService{
          
 		return movieList;
 	}
+
+	@Override
+	public List<MovieShareSummaryInterface> searchMovie(MovieSearchRequest movieSearchRequest)
+ {
+		return movieRepository.findByLanguageAndSearchOrderByCreatedDate(movieSearchRequest.getLanguage(),
+				movieSearchRequest.getLimit(), 
+				movieSearchRequest.getOffset(), 
+				StatusEnum.ACTIVE.name().toLowerCase(), movieSearchRequest.getSearch());
+		
+	
+}
 }

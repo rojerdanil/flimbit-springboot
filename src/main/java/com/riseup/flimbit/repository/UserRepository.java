@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.riseup.flimbit.entity.User;
 import com.riseup.flimbit.entity.dto.ChartProjectionDTO;
 import com.riseup.flimbit.entity.dto.DashboardMetricsDTO;
-import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
+import com.riseup.flimbit.entity.dto.UserWithStatusWebDto;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 	Optional<User> findByphoneNumber(String phoneNumber);
@@ -61,7 +61,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 
 					    """, nativeQuery = true)
-	Page<UserWithStatusDTO> fetchAllUsersWithStatus(@Param("language") int language, @Param("movie") int movie,
+	Page<UserWithStatusWebDto> fetchAllUsersWithStatus(@Param("language") int language, @Param("movie") int movie,
 			@Param("status") String status, @Param("search") String searchText, Pageable pageable);
 
 	@Query(value = """

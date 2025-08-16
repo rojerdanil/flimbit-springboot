@@ -66,9 +66,7 @@ public class MovieController {
 	
 	@PostMapping("/listMovies")
     public ResponseEntity<?> listMovies(
-    		@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
+ 
     		@RequestBody MovieSearchRequest movieSearchRequest
     		)
     {
@@ -156,11 +154,9 @@ public class MovieController {
     
     @GetMapping("/moviebyId")
     public ResponseEntity<?> getMoviesForDataTable(
-    		@RequestHeader(value="deviceId") String deviceId,
-    		@RequestHeader(value="phoneNumber") String phoneNumber,
-    		@RequestHeader(value="accessToken") String accessToken,
     		 @RequestParam("id") int id
-    		) {
+    		) 
+    {
     	
         return ResponseEntity.status(HttpStatus.OK).body(movieService.findMovieSummaryById(id));
     }
@@ -186,5 +182,15 @@ public class MovieController {
     	
         return HttpResponseUtility.getHttpSuccess(movieService.getMovieByLanguage(id));
     }		
+    @PostMapping("/mobile/searchmovie")
+    public ResponseEntity<?> getSearchMovie(
+ 
+    		@RequestBody MovieSearchRequest movieSearchRequest
+    		)
+    {
+		
+		
+        return HttpResponseUtility.getHttpSuccess(movieService.searchMovie(movieSearchRequest));
+    }
     		
 }

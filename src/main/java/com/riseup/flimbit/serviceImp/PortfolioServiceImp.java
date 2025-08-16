@@ -54,7 +54,13 @@ public class PortfolioServiceImp implements PortfolioService{
 				
 			}
 			}*/
-			MovieInvestSummary miSummery = movieInvestRepo.getPortFolioSummary(user.getId());
+			long userId = user.getId();
+			
+			
+		
+			MovieInvestSummary miSummery = movieInvestRepo.getPortFolioSummary(userId);
+			//MovieInvestSummary miSummery = movieInvestRepo.getPortFolioSummary(29);
+			
 			
 			PortFolioResponse pfRes = PortFolioResponse.builder()
 					                 .totalInvested(miSummery.getTotalInvested())
@@ -69,7 +75,7 @@ public class PortfolioServiceImp implements PortfolioService{
 					                 .onHoldStageFunds(miSummery.getHoldingFunds())
 					                 .build();
 			
-			List<EarningBreakInFace>  earnList = movieInvestRepo.getEarningBreak(user.getId());
+			List<EarningBreakInFace>  earnList = movieInvestRepo.getEarningBreak(userId);
 			if(Optional.ofNullable(earnList).isPresent())
 			{
 				List<EarningBreakResponse> earnResList  = new ArrayList<EarningBreakResponse>();

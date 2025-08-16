@@ -156,4 +156,24 @@ public class MovieInvestController {
 
 		return HttpResponseUtility.getHttpSuccess(movieInvestService.repayShareInvestMoneyToUser(statusRequest));
 	}
+	
+	@GetMapping("/mobile/readUserBuyedShare")
+	public ResponseEntity<?> getReadUserBuyedShare()
+	{
+
+		return HttpResponseUtility
+				.getHttpSuccess(movieInvestService.getUserMoviePurchasesByUserId());
+	}
+	
+	
+	
+	@GetMapping("/mobile/readUserShareWithoffer/{movieId}")
+	public ResponseEntity<?> gerRadUserShareWithoffer(@PathVariable("movieId") int movieId)
+	{
+
+		return HttpResponseUtility
+				.getHttpSuccess(movieInvestService.getUserShareWithOffer(movieId));
+	}
+	
+	
 }

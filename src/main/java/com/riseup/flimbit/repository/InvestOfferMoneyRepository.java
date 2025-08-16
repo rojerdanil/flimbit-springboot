@@ -17,6 +17,9 @@ public interface InvestOfferMoneyRepository extends JpaRepository<InvestOfferMon
     List<InvestOfferMoney> findByInvestId(Integer investId);
 
     List<InvestOfferMoney> findByOfferId(Integer offerId);
+    
+    List<InvestOfferMoney> findByMovieIdAndShareTypeIdAndUserId(int movieId,int shareTypeId,int userId);
+    
 
     boolean existsByInvestIdAndOfferId(Integer investId, Integer offerId);
     

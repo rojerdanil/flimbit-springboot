@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.Bidi;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,8 +37,10 @@ import com.riseup.flimbit.entity.InvestOfferMoney;
 import com.riseup.flimbit.entity.InvestmentStatus;
 import com.riseup.flimbit.entity.Movie;
 import com.riseup.flimbit.entity.User;
+import com.riseup.flimbit.entity.dto.MovieDTO;
 import com.riseup.flimbit.entity.dto.UserInvestmentSectionDTO;
 import com.riseup.flimbit.entity.dto.UserInvestmentSharTypeDTO;
+import com.riseup.flimbit.entity.dto.UserMoviePurchaseProjection;
 import com.riseup.flimbit.gateway.payment.PaymentFactory;
 import com.riseup.flimbit.gateway.payment.PaymentOrderResponse;
 import com.riseup.flimbit.gateway.payment.PaymentService;
@@ -58,8 +61,10 @@ import com.riseup.flimbit.request.SharePaymentRequest;
 import com.riseup.flimbit.request.StatusRequest;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.PaymentFeeResponse;
+import com.riseup.flimbit.response.ShareOfferListResponse;
 import com.riseup.flimbit.response.SharePaymentResponse;
 import com.riseup.flimbit.response.SuccessResponse;
+import com.riseup.flimbit.response.UserShareOfferListResponse;
 import com.riseup.flimbit.response.SharePaymentResponse;
 import com.riseup.flimbit.response.dto.AuditPair;
 import com.riseup.flimbit.response.dto.InvestOfferMoneyDTO;
@@ -1193,6 +1198,61 @@ public class MovieInvestServiceImp implements MovieInvestService {
 		}
 	   		
 		
+	}
+
+	@Override
+	public List<UserMoviePurchaseProjection> getUserMoviePurchasesByUserId() {
+		// TODO Auto-generated method stub
+		UserContext loginUser = UserContextHolder.getContext();
+		if(loginUser == null)
+			throw new RuntimeException("User is not found");
+		logger.info("current user id " +  loginUser.getUserId());
+		
+		return movieInvestRepo.findUserMoviePurchases(loginUser.getUserId());
+	}
+
+	@Override
+	public UserShareOfferListResponse getUserShareWithOffer(int movieId) {
+		// TODO Auto-generated method stub
+		UserContext loginUser = UserContextHolder.getContext();
+		if(loginUser == null)
+			throw new RuntimeException("Uesr is not found");
+		UserShareOfferListResponse userResponse = UserShareOfferListResponse.builder().build();		
+		MovieDTO movie = movieRepository.findMoviesWithStatusAndTypeAndLangName(movieId);
+		if(movie == null)
+			throw new RuntimeException("Movie is not found ");
+		
+		userResponse.setMovie(movie);
+		loginUser.setUserId(29);
+		Optional<List<UserInvestmentSharTypeDTO>>  shareList =  movieInvestRepo.getInvestmentsWithShareTypeByMovId(movieId
+				, loginUser.getUserId());
+		List<ShareOfferListResponse> shareOfferList = new ArrayList<ShareOfferListResponse>();
+
+		if(shareList.isPresent())
+		{
+			logger.info("share list is found");
+			List<UserInvestmentSharTypeDTO> userShareList = shareList.get();
+			logger.info("share list is found "  + userShareList.size());
+
+			if(userShareList != null )
+			{
+				for(UserInvestmentSharTypeDTO userShare :userShareList )
+				{
+					logger.info("share list is found");
+
+					ShareOfferListResponse shareOffer = ShareOfferListResponse.builder().build();
+					shareOffer.setShareDetail(userShare);
+					
+					List<InvestOfferMoney> investMoneyList = investMoneyRepo.findByMovieIdAndShareTypeIdAndUserId(movieId,userShare.getShareId(),loginUser.getUserId());
+					
+					shareOffer.setInvestMoneyList(investMoneyList);
+					shareOfferList.add(shareOffer);
+					
+				}
+			}
+		}
+		userResponse.setShareOffer(shareOfferList);		
+		return userResponse;
 	}
 	
 	

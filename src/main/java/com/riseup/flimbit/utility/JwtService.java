@@ -8,6 +8,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.riseup.flimbit.constant.Messages;
 import com.riseup.flimbit.response.CommonResponse;
 import com.riseup.flimbit.response.TokenResponse;
+import com.riseup.flimbit.security.JwtUserContextFilter;
 import com.riseup.flimbit.service.TokenExpiryService;
 
 import java.security.Key;
@@ -28,6 +31,9 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+	
+ 	Logger logger = LoggerFactory.getLogger(JwtService.class);
+
 
 	@Value("${jwt.secret.key}")
 	String SECRET;
@@ -139,7 +145,7 @@ public class JwtService {
 		CommonResponse common = CommonResponse.builder().build();
 		try {
 			final String username = extractUsername(token);
-			System.out.println("username :" + username + " : log :" + userName + ":" + deviceId);
+			logger.info("username :" + username + " : log :" + userName + ":" + deviceId);
 	    	 String tokenKey =userName +":"+ deviceId;
 
 			boolean isValid = (username.equals(tokenKey) && !isTokenExpired(token));
@@ -158,7 +164,7 @@ public class JwtService {
 				}
 			}
 		} catch (ExpiredJwtException ex) {
-			System.out.println("token expired");
+			logger.info("token expired");
 			common.setStatus(Messages.STATUS_FAILURE);
 			common.setMessage(Messages.JWT_TOKEN_EXPIRED);
 			
@@ -179,30 +185,30 @@ public class JwtService {
 
 	    try {
 	        final String username = extractUsername(token);
-	        System.out.println("username: " + username + " : log: " + phoneNumber + " : " + deviceId);
+	        logger.info("username: " + username + " : log: " + phoneNumber + " : " + deviceId);
 
 	        String tokenKey = phoneNumber + ":" + deviceId;
 	        boolean isValid = (username.equals(tokenKey) && !isTokenExpired(token));
-	        System.out.println("is valid: " + isValid);
+	        logger.info("is valid: " + isValid);
 
 	        if (!isValid) {
 	            if (!username.equals(phoneNumber + ":" + deviceId)) {
 	                // Log error message for deviceId and username mismatch
-	                System.out.println("Error: " + Messages.JWT_TOKEN_DEVICEID_USERNAME_WRONG);
+	            	logger.info("Error: " + Messages.JWT_TOKEN_DEVICEID_USERNAME_WRONG);
 	            } else {
 	                // Log error message for token expiration
-	                System.out.println("Error: " + Messages.JWT_TOKEN_EXPIRED);
+	            	logger.info("Error: " + Messages.JWT_TOKEN_EXPIRED);
 	            }
 	        }
 
 	        return isValid;
 	    } catch (ExpiredJwtException ex) {
 	        // Log error message for expired token
-	        System.out.println("Error: Token expired");
+	    	logger.info("Error: Token expired");
 	        return false;
 	    } catch (SignatureException ex) {
 	        // Log error message for invalid token signature
-	        System.out.println("Error: Invalid token signature");
+	    	logger.info("Error: Invalid token signature");
 	        return false;
 	    }
 	}

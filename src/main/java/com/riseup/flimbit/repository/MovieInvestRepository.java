@@ -19,6 +19,7 @@ import com.riseup.flimbit.entity.dto.MovieInvestmentSummaryDTO;
 import com.riseup.flimbit.entity.dto.MovieProfitRawDataDTO;
 import com.riseup.flimbit.entity.dto.UserInvestmentSectionDTO;
 import com.riseup.flimbit.entity.dto.UserInvestmentSharTypeDTO;
+import com.riseup.flimbit.entity.dto.UserMoviePurchaseProjection;
 
 public interface MovieInvestRepository extends JpaRepository<MovieInvestment, Integer> {
 
@@ -31,28 +32,101 @@ public interface MovieInvestRepository extends JpaRepository<MovieInvestment, In
 
 	List<MovieInvestment> findByUserId(long userId);
 
-	@Query(value = " SELECT SUM(mi.amount_invested) AS totalInvested,SUM(mi.return_amount) AS totalReturns,"
-			+ "ROUND(CASE WHEN SUM(mi.amount_invested) = 0 THEN 0 "
-			+ " ELSE (SUM(mi.return_amount) * 100 / SUM(mi.amount_invested))  END, 2) AS averageRoi,"
-			+ " COUNT(DISTINCT mi.movie_id) AS projectsInvested,"
-			+ "COUNT(DISTINCT CASE WHEN ms.name IN ('Released','Box Office Running','Profit Distribution','Archived') THEN mi.movie_id END) AS successfulReleases,"
-			+ "COUNT(DISTINCT CASE WHEN ms.name IN ('Idea Stage','Pre-Production','Funding Open','Funding Closed'"
-			+ ",'Production', 'Post Production','Trailer Released','Coming Soon') THEN mi.movie_id END) AS ongoingProjects"
-			+ ", COUNT(DISTINCT CASE WHEN ms.name IN ('On Hold','Cancelled') THEN mi.movie_id END) AS HoldReleases "
-			+ ",SUM(DISTINCT CASE WHEN ms.name IN ('Released','Box Office Running','Profit Distribution','Archived') THEN mi.amount_invested ELSE 0 END) AS releasedFunds"
-			+ ", SUM(DISTINCT CASE WHEN ms.name IN ('On Hold','Cancelled') THEN mi.amount_invested ELSE 0 END) AS holdingFunds"
-			+ ",SUM(DISTINCT CASE WHEN ms.name IN ('Idea Stage','Pre-Production','Funding Open','Funding Closed',"
-			+ " 'Production', 'Post Production','Trailer Released','Coming Soon') THEN mi.amount_invested ELSE 0 END) AS ongoingFunds"
-			+ " FROM movies_investment mi JOIN movies m ON mi.movie_id = m.id "
-			+ " JOIN  movie_status ms ON m.status_id = ms.id  WHERE  mi.user_id = ?1", nativeQuery = true)
-	MovieInvestSummary getPortFolioSummary(long userId);
+	@Query(value = """
+		    SELECT 
+		        COALESCE(SUM(i.invested), 0) AS totalInvested,
+		        COALESCE(SUM(COALESCE(p.totalReturn, 0)), 0) AS totalReturns,
+		        COALESCE(
+		            ROUND(
+		                (SUM(COALESCE(p.totalReturn, 0)) * 100.0) / NULLIF(SUM(i.invested), 0),
+		            2),
+		        0) AS averageRoi,
 
-	@Query(value = "SELECT mo.title as movieName ,sum(mi.amount_invested) as invested ,sum(mi.return_amount) as returned"
-			+ ",ROUND(CASE WHEN SUM(mi.amount_invested) = 0 THEN 0"
-			+ " ELSE (SUM(mi.return_amount) * 100 / SUM(mi.amount_invested))  END, 2) AS averageRoi"
-			+ " from movies_investment mi"
-			+ " LEFT JOIN movies mo on mo.id = mi.movie_id where mi.user_id = ?1 group by mo.title", nativeQuery = true)
-	List<EarningBreakInFace> getEarningBreak(long userId);
+		        COALESCE(COUNT(*), 0) AS projectsInvested,
+
+		        COALESCE(SUM(CASE 
+		            WHEN ms.name IN ('Released','Box Office Running','Profit Distribution','Archived') 
+		            THEN 1 ELSE 0 END), 0) AS successfulReleases,
+
+		        COALESCE(SUM(CASE 
+		            WHEN ms.name IN ('Idea Stage','Pre-Production','Funding Open','Funding Closed',
+		                             'Production','Post Production','Trailer Released','Coming Soon') 
+		            THEN 1 ELSE 0 END), 0) AS ongoingProjects,
+
+		        COALESCE(SUM(CASE 
+		            WHEN ms.name IN ('On Hold','Cancelled') 
+		            THEN 1 ELSE 0 END), 0) AS HoldReleases,
+
+		        COALESCE(SUM(CASE 
+		            WHEN ms.name IN ('Released','Box Office Running','Profit Distribution','Archived') 
+		            THEN i.invested ELSE 0 END), 0) AS releasedFunds,
+
+		        COALESCE(SUM(CASE 
+		            WHEN ms.name IN ('On Hold','Cancelled') 
+		            THEN i.invested ELSE 0 END), 0) AS holdingFunds,
+
+		        COALESCE(SUM(CASE 
+		            WHEN ms.name IN ('Idea Stage','Pre-Production','Funding Open','Funding Closed',
+		                             'Production','Post Production','Trailer Released','Coming Soon') 
+		            THEN i.invested ELSE 0 END), 0) AS ongoingFunds
+
+		    FROM (
+		        SELECT 
+		            mi.user_id,
+		            mi.movie_id,
+		            SUM(mi.amount_invested) AS invested
+		        FROM movies_investment mi
+		        WHERE mi.user_id = ?1
+		        GROUP BY mi.user_id, mi.movie_id
+		    ) i
+		    JOIN movies m ON m.id = i.movie_id
+		    JOIN movie_status ms ON ms.id = m.status_id
+		    LEFT JOIN (
+		        SELECT 
+		            py.user_id,
+		            py.movie_id,
+		            SUM(py.amount) AS totalReturn
+		        FROM payout py
+		        WHERE py.user_id = ?1            -- filter early
+		        GROUP BY py.user_id, py.movie_id
+		    ) p ON p.user_id = i.user_id AND p.movie_id = i.movie_id
+		    """, nativeQuery = true)
+		MovieInvestSummary getPortFolioSummary(long userId);
+
+
+	@Query(value = """
+		    SELECT 
+		        mo.title AS movieName,
+		        COALESCE(i.invested, 0) AS invested,
+		        COALESCE(p.totalReturn, 0) AS returned,
+		        COALESCE(
+		            ROUND(
+		                CASE 
+		                    WHEN i.invested = 0 THEN 0
+		                    ELSE (p.totalReturn * 100 / i.invested)
+		                END, 
+		            2),
+		        0) AS averageRoi
+		    FROM (
+		        SELECT 
+		            movie_id,
+		            SUM(amount_invested) AS invested
+		        FROM movies_investment
+		        WHERE user_id = ?1
+		        GROUP BY movie_id
+		    ) i
+		    JOIN movies mo ON mo.id = i.movie_id
+		    LEFT JOIN (
+		        SELECT 
+		            movie_id,
+		            SUM(amount) AS totalReturn
+		        FROM payout
+		        WHERE user_id = ?1
+		        GROUP BY movie_id
+		    ) p ON p.movie_id = i.movie_id
+		    """, nativeQuery = true)
+		List<EarningBreakInFace> getEarningBreak(long userId);
+
 
 	@Query(value = "SELECT i.movie_id AS movieId, SUM(i.number_Of_Shares) AS totalShares " + "FROM movies_investment i "
 			+ "WHERE i.movie_id IN :movieIds " + "GROUP BY i.movie_id", nativeQuery = true)
@@ -88,7 +162,7 @@ public interface MovieInvestRepository extends JpaRepository<MovieInvestment, In
 
 			FROM movies_investment mi
 			JOIN users us ON mi.user_id = us.id
-			JOIN movies mov ON mi.movie_id = mov.id
+			JOIN movies mov ON mi.movie_id = mov.id	
 			JOIN languages lang ON lang.id = mov.language
 			JOIN share_type st ON st.id = mi.share_type_id
 
@@ -331,4 +405,64 @@ public interface MovieInvestRepository extends JpaRepository<MovieInvestment, In
 	@Query(value = "SELECT COUNT(DISTINCT user_id) FROM movies_investment "
 			+ "WHERE movie_id = :movieId AND is_processed = false", nativeQuery = true)
 	int countDistinctUserIdsByMovieIdAndIsProcessedFalse(@Param("movieId") int movieId);
+	
+	@Query(value = """
+			SELECT
+			     m.id AS movieId,
+			  m.title AS movieName,
+			  m.budget AS budget,
+			  m.per_share_amount AS perShareAmount,
+			  COALESCE(SUM(mi.amount_invested), 0) AS totalInvestedAmount,
+			  COALESCE(SUM(mi.number_of_shares), 0) AS totalSharesPurchased,
+			  COUNT(DISTINCT mi.user_id) AS totalInvestors
+			FROM movies_investment mi
+			JOIN movies m ON m.id = mi.movie_id
+			WHERE mi.user_id = :userId
+			GROUP BY m.id, m.title, m.budget, m.per_share_amount
+			""", nativeQuery = true)
+	MovieInvestmentSummaryDTO getMovieInvestmentSummaryForUserId(@Param("userId") int userId);
+	
+	
+	
+	    @Query(value = """
+	            SELECT
+	                m.id AS movieId,
+	                m.title AS movieName,
+	                m.budget AS budget,
+	                m.per_share_amount AS perShareAmount,
+	                m.description AS description,
+	                m.created_date AS createdDate,
+	                m.updated_date AS updateDate,
+	                m.trailer_date AS trailerDate,
+	                m.poster_url AS posterUrl,
+	                COALESCE(SUM(mi.amount_invested), 0) AS totalInvestedAmount,
+	                COALESCE(SUM(mi.number_of_shares), 0) AS totalSharesPurchased,
+	                COUNT(DISTINCT mi.user_id) AS totalInvestors,
+	                ms.name AS movieStatus,
+	                m.status_id AS movieStatusId,
+	                mt.name AS movieType,
+	                p.totalReturn AS totalReturn,
+	                MAX(mi.invested_at) AS lastInvestmentDate
+	            FROM movies_investment mi
+	            JOIN movies m ON m.id = mi.movie_id
+	            LEFT JOIN movie_status ms ON m.status_id = ms.id
+	            LEFT JOIN movie_types mt ON mt.id = movie_type_id
+	            LEFT JOIN (
+	                SELECT 
+	                    py.user_id,
+	                    py.movie_id,
+	                    SUM(py.amount) AS totalReturn
+	                FROM payout py
+	                WHERE py.user_id = :userId
+	                GROUP BY py.user_id, py.movie_id
+	            ) p ON p.user_id = mi.user_id AND p.movie_id = mi.movie_id
+	            WHERE mi.user_id = :userId
+	            GROUP BY m.id, m.title, m.budget, m.per_share_amount, m.description,
+	                     m.created_date, m.updated_date, m.trailer_date, m.poster_url,
+	                     ms.name, m.status_id, mt.name, p.totalReturn
+	                     ORDER BY lastInvestmentDate DESC
+	            """, nativeQuery = true)
+	    List<UserMoviePurchaseProjection> findUserMoviePurchases(@Param("userId") int userId);
+	
+
 }

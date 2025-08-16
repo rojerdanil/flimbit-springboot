@@ -171,18 +171,7 @@ public class LoginController {
 
 	}
 
-	@PostMapping("/refresh")
-	public ResponseEntity<?> refresh(@RequestHeader(value = "deviceId") String deviceId,
-			@RequestHeader(value = "phoneNumber") String phoneNumber, @RequestBody RefreshTokenRequest refreshRequest) {
-		CommonResponse commonToken = userRegisterService.genRefreshToken(deviceId, phoneNumber, refreshRequest);
-
-		if (commonToken.getStatus() != Messages.SUCCESS) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(commonToken);
-		}
-
-		return ResponseEntity.status(HttpStatus.OK).body(commonToken);
-
-	}
+	
 
 	@PostMapping(path = "/mobile/createToken", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<?> getMobileLogin(@RequestHeader("X-Device-ID") String deviceId,

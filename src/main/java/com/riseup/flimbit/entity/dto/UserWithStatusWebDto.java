@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.Value;
 import java.math.BigDecimal;
 
-public interface UserWithStatusDTO {
+public interface UserWithStatusWebDto {
 
 	int getId();
     String getPhoneNumber();

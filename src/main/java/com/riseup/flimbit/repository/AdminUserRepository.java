@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.riseup.flimbit.entity.AdminUser;
 import com.riseup.flimbit.entity.dto.AdminUserDTO;
-import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
+import com.riseup.flimbit.entity.dto.UserWithStatusWebDto;
 
 @Repository
 public interface AdminUserRepository extends JpaRepository<AdminUser, Integer> {

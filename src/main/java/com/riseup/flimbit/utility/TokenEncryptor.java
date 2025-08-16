@@ -33,6 +33,7 @@ public class TokenEncryptor {
             byte[] original = cipher.doFinal(Base64.getDecoder().decode(encryptedToken));
             return new String(original);
         } catch (Exception ex) {
+        	System.out.println("failed ");
             throw new RuntimeException("Error decrypting token", ex);
         }
     }

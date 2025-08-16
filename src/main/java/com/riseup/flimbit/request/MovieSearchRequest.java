@@ -9,8 +9,9 @@ import lombok.Setter;
 @Setter
 public class MovieSearchRequest	 {
 	
-	String language;
+	int language;
 	int offset;
 	int limit;
+	String search;
 
 }

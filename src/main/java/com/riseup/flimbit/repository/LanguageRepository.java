@@ -11,6 +11,6 @@ import com.riseup.flimbit.entity.Language;
 @Repository
 public interface LanguageRepository extends JpaRepository<Language, Long> {
 	
-	List<Language> findAllByOrderByNameAsc();
+	List<Language> findAllByStatusIgnoreCaseOrderByNameAsc(String status);
 
 }

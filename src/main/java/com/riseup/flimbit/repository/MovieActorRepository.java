@@ -3,7 +3,7 @@ package com.riseup.flimbit.repository;
 import com.riseup.flimbit.entity.ActorsPlayInMovieInterface;
 import com.riseup.flimbit.entity.MovieActor;
 import com.riseup.flimbit.entity.dto.ActorDTO;
-import com.riseup.flimbit.entity.dto.UserWithStatusDTO;
+import com.riseup.flimbit.entity.dto.UserWithStatusWebDto;
 
 import java.util.List;
 import java.util.Optional;
