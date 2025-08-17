@@ -571,8 +571,13 @@ public class UserRegisterServiceImp implements UserRegisterService {
          String userToken = user.getAccessKey().trim();
       	 String refreshToken = user.getRefreshToken().trim();
       	 String providedToken = token.trim();
-           
-      	 if (!userToken.equals(providedToken) && !refreshToken.equals(providedToken)) {
+    	 
+     	// Debug: Print lengths and contents
+     	 
+     	
+
+
+      	 if (!userToken.trim().equals(providedToken) && !refreshToken.trim().equals(providedToken)) {
  		    logger.info("Token does not match with refresh or access token. Device ID: " + phoneNumber);
  		    return null;
  		  }      
