@@ -10,6 +10,4 @@ target/
 # OS
 .DS_Store
 
-# Spring Boot
-application.properties
-application-*.properties
+
